@@ -1,3 +1,5 @@
+"use strict";
+
 class MainMenuScene extends Scene{
 
   init () {

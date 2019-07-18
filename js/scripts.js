@@ -1,3 +1,4 @@
+"use strict";
 
 window.onload = () => {
 
@@ -5,7 +6,12 @@ window.onload = () => {
     "./js/core/display.js",
     "./js/core/scene.js",
     "./js/core/game.js",
+    "./js/core/camera.js",
+    "./js/core/sprites.js",
 
+    "./js/grounds.js",
+    "./js/grid.js",
+    "./js/steve.js",
     "./js/game_scenes.js"
   ], function(){
 
@@ -14,7 +20,7 @@ window.onload = () => {
       startScene: NormalGameScene
     });
     game.run();
-    
+
   });
 
 };

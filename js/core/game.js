@@ -1,3 +1,5 @@
+"use strict";
+
 const GAME_DEFAULT_OPTIONS = {
   width: 800,
   height: 600,
