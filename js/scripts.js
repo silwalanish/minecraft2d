@@ -2,17 +2,19 @@
 window.onload = () => {
 
   loadScripts([
-    "./js/core/controller.js",
     "./js/core/display.js",
-    "./js/core/engine.js",
-    "./js/core/game.js"
+    "./js/core/scene.js",
+    "./js/core/game.js",
+
+    "./js/game_scenes.js"
   ], function(){
 
-    let display = new Display(document.documentElement.clientWidth, document.documentElement.clientHeight);
-    let gameContainer = document.getElementById("game-container");
+    let game = new Game(document.getElementById("game-container"), {
+      fullScreen: true,
+      startScene: NormalGameScene
+    });
+    game.run();
     
-    gameContainer.appendChild(display.init());
-    display.clearColor("#000");
   });
 
 };
