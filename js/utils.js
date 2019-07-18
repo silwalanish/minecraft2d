@@ -15,13 +15,18 @@ function loadScripts (scriptFiles, callback) {
     let script = document.createElement("script");
     script.setAttribute("type", "text/javascript");
     script.setAttribute("src", scriptFilePath);
+
     script.onload = () => {
       nScriptFileRem--;
+      console.log(nScriptFileRem, script.src);
+      
       if(nScriptFileRem == 0){
         callback();
       }
     };
+
     document.head.appendChild(script);
+
   });
 
 }
