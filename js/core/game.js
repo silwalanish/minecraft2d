@@ -19,8 +19,8 @@ class Game {
     this.options = options || {};
     this.options = this.options.extends(GAME_DEFAULT_OPTIONS);
     if(this.options.fullScreen){
-      this.options.width = window.innerWidth;
-      this.options.height = window.innerHeight;
+      this.options.width = window.innerWidth - 10;
+      this.options.height = window.innerHeight - 10;
     }
     this.isInitialized = false;
   }
@@ -41,8 +41,8 @@ class Game {
 
   onResize (e) {
     if(this.options.fullScreen){
-      this.options.width = window.innerWidth;
-      this.options.height = window.innerHeight - 5;
+      this.options.width = window.innerWidth - 10;
+      this.options.height = window.innerHeight - 10;
       this.display.resize(this.options.width, this.options.height);
       this.sceneManager.resize(this.options.width, this.options.height);
     }

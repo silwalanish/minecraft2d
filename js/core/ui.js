@@ -16,9 +16,6 @@ class UIHandler{
           case 'mouseover':
             element.onMouseOver(e);
             break;
-          case 'mouseout':
-            element.onMouseOut(e);
-            break;
           case 'mousedown':
             element.onMouseDown(e);
             break;
@@ -28,6 +25,10 @@ class UIHandler{
           case 'mousemove':
             element.onMouseMove(e);
             break;
+        }
+      }else{
+        if(element.isMouseOverState){
+          element.onMouseOut(e);
         }
       }
     });
@@ -45,7 +46,7 @@ class UIHandler{
 
   update (deltaTime) {
     this.uiElements.forEach(element => {
-      element.update(ctx);
+      element.update(deltaTime);
     });
   }
 
@@ -56,7 +57,10 @@ class UIElement{
   constructor (pos, dims) {
     this.pos = pos;
     this.dims = dims;
-    this.background = null;
+    this.background = {
+      color: null,
+      image: null
+    };
     this.borderColor = null;
     this.borderSize = null;
     this.onClickListener = null;
@@ -65,6 +69,8 @@ class UIElement{
     this.onMouseDownListener = null;
     this.onMouseUpListener = null;
     this.onMouseMoveListener = null;
+
+    this.isMouseOverState = false;
   }
 
   setEventListener(eventType, callback) {
@@ -97,35 +103,36 @@ class UIElement{
   }
 
   onMouseOver (e) {
-    if(this.onMouseOver){
+    this.isMouseOverState = true;
+    if(this.onMouseOverListener){
       this.onMouseOverListener(e);
     }
   }
 
   onMouseOut (e) {
-    if(this.onMouseOut){
+    this.isMouseOverState = false;
+    if(this.onMouseOutListener){
       this.onMouseOutListener(e);
     }
   }
 
   onMouseDown (e) {
-    if(this.onMouseDown){
+    if(this.onMouseDownListener){
       this.onMouseDownListener(e);
     }
   }
 
   onMouseUp (e) {
-    if(this.onMouseUp){
+    if(this.onMouseUpListener){
       this.onMouseUpListener(e);
     }
   }
 
-  setFontSize (fontSize) {
-    this.fontSize = fontSize;
-    this.dims.x = this.fontSize * this.text.length + 10;
-    this.dims.y = this.fontSize + 10;
+  onMouseMove (e) {
+    if(this.onMouseMoveListener){
+      this.onMouseMoveListener(e);
+    }
   }
-
 
   update (deltaTime) {
     // Implemented in Child Classes
@@ -134,11 +141,17 @@ class UIElement{
   draw (ctx) {
     ctx.beginPath();
     ctx.save();
-    ctx.translate(this.pos.x + this.dims.x / 2, this.pos.y + this.dims.y / 2);
+    ctx.translate(this.pos.x, this.pos.y);
     ctx.rect(-this.dims.x / 2, -this.dims.y / 2, this.dims.x, this.dims.y);
     if(this.background){
-      ctx.fillStyle = this.background;
-      ctx.fill();
+      if(this.background.image){
+        ctx.fillStyle = ctx.createPattern(this.background.image, "repeat");
+        ctx.fill();
+      }
+      if(this.background.color){
+        ctx.fillStyle = this.background.color;
+        ctx.fill();
+      }
     }
     if(this.borderColor){
       ctx.strokeStyle = this.borderColor;
@@ -150,15 +163,15 @@ class UIElement{
   }
 
   contains (point) {
-    return (point.x >= this.pos.x && point.x <= this.pos.x + this.dims.x) &&
-           (point.y >= this.pos.y && point.y <= this.pos.y + this.dims.y);
+    return (point.x >= this.pos.x - this.dims.x / 2 && point.x <= this.pos.x + this.dims.x / 2) &&
+           (point.y >= this.pos.y - this.dims.y / 2 && point.y <= this.pos.y + this.dims.y / 2);
   }
 
 }
 
 class UIText extends UIElement{
 
-  constructor (text, pos, color = "#000", fontSize = 16, fontFamily = "Arial") {
+  constructor (text, pos, color = "#000", fontSize = 16, fontFamily = "Minecraft") {
     super(pos, new Vector(fontSize * text.length + 10, fontSize + 10));
     this.text = text;
     this.color = color;
@@ -166,22 +179,23 @@ class UIText extends UIElement{
     this.fontSize = fontSize;
     this.fontFamily = fontFamily;
     this.textAlign = "center";
+    this.image = null;
+  }
+
+  fillWithImage (image) {
+    this.image = image;
   }
 
   draw (ctx) {
     super.draw(ctx);
     ctx.beginPath();
     ctx.save();
-    ctx.translate(this.pos.x + this.dims.x / 2, this.pos.y + this.dims.y / 2);
     ctx.textAlign = this.textAlign;
-    ctx.font = "${fontWeight} ${fontSize}px ${fontFamily}";
-    ctx.fillText(this.text, 0, -this.dims.y / 2);
+    ctx.fillStyle = this.image ? ctx.createPattern(this.image, "repeat") : this.color;
+    ctx.font = `${this.fontWeight} ${this.fontSize}px ${this.fontFamily}`;
+    ctx.fillText(this.text, this.pos.x, this.pos.y + this.dims.y / 2 - this.fontSize / 2);
     ctx.restore();
     ctx.closePath();
-  }
-
-  update (deltaTime) {
-    super.update(deltaTime);
   }
 
 }
@@ -190,17 +204,13 @@ class UIButton extends UIElement{
 
   constructor (text, pos, dims, color = "#000", fontSize = 16, fontFamily) {
     super(pos, dims);
-    this.text = new UIText(text, pos, color, fontSize, fontFamily);
-
-  }
-
-  update (deltaTime) {
+    this.textNode = new UIText(text, pos.copy(), color, fontSize, fontFamily);
 
   }
 
   draw (ctx) {
     super.draw(ctx);
-    this.text.draw(ctx);
+    this.textNode.draw(ctx);
   }
 
 }

@@ -150,22 +150,21 @@ class Steve{
     let endX = Math.min(BR.x, grid.dims.x);
     let endY = Math.min(BR.y, grid.dims.y);
     
-    grid.cellIsNearPlayer(Vector.sub(TL, new Vector(1, 0)));
-    grid.cellIsNearPlayer(Vector.sub(TL, new Vector(0, 1)));
-    grid.cellIsNearPlayer(Vector.sub(TL, new Vector(1, 1)));
+    // grid.cellIsNearPlayer(Vector.sub(TL, new Vector(1, 0)));
+    // grid.cellIsNearPlayer(Vector.sub(TL, new Vector(0, 1)));
+    // grid.cellIsNearPlayer(Vector.sub(TL, new Vector(1, 1)));
 
-    grid.cellIsNearPlayer(Vector.add(TR, new Vector(1, 0)));
-    grid.cellIsNearPlayer(Vector.sub(TR, new Vector(0, 1)));
-    grid.cellIsNearPlayer(Vector.add(TR, new Vector(1, -1)));
-    grid.cellIsNearPlayer(Vector.sub(BL, new Vector(1, 0)));
-    grid.cellIsNearPlayer(Vector.add(BR, new Vector(1, 0)));
+    // grid.cellIsNearPlayer(Vector.add(TR, new Vector(1, 0)));
+    // grid.cellIsNearPlayer(Vector.sub(TR, new Vector(0, 1)));
+    // grid.cellIsNearPlayer(Vector.add(TR, new Vector(1, -1)));
+    // grid.cellIsNearPlayer(Vector.sub(BL, new Vector(1, 0)));
+    // grid.cellIsNearPlayer(Vector.add(BR, new Vector(1, 0)));
     
     for (let i = startX; i <= endX; i++) {
       for (let j = startY; j <= endY; j++) {
         let cell = grid.cellAt(new Vector(i, j));
         if(cell){
           grid.cells[j][i].isCollidingWithPlayer = true;
-          grid.cells[j][i].isNearPlayer = true;
         }
       }
     }
@@ -182,18 +181,6 @@ class Steve{
     }else{
       this.isOnGround = false;
     }
-    
-    if(collidesTL || collidesTR && !this.isOnGround){
-      this.pos.y = (TL.y + 1) * grid.gridDims.y;
-      this.vel.y = -this.vel.y * 0.2;
-    }
-    // else if(collidesTL && collidesBL){
-    //   this.pos.x = (TL.x + 1) * grid.gridDims.x;
-    //   this.vel.x = 0;
-    // }else if(collidesTR && collidesBR){
-    //   this.pos.x = (TR.x) * grid.gridDims.x - this.dims.y;
-    //   this.vel.x = 0;
-    // }
   }
 
   addReward (rewards) {
@@ -208,6 +195,10 @@ class Steve{
         this.rewards.wood += rewards.reward;
         break;
     }
+  }
+
+  getCenterPos () {
+    return Vector.add(this.pos, Vector.mul(this.dims, 0.5));
   }
 
   getGoldRewards () {

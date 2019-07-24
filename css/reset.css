@@ -2,3 +2,8 @@
   margin: 0px;
   padding: 0px;
 }
+
+@font-face {
+  font-family: "Minecraft";
+  src: url("../fonts/Minecraft/1_Minecraft-Regular.otf");
+}

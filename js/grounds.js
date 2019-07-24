@@ -9,8 +9,10 @@ class Cell{
 
     this.isMouseOver = false;
     this.isNearPlayer = false;
+    this.canMineCell = false;
     this.isCollidingWithPlayer = false;
     this.isGround = true;
+    this.isCulled = false;
 
     this.destroyed = 0;
     
@@ -19,23 +21,28 @@ class Cell{
 
   genWorldPos () {
     this.pos = this.grid.toWorldPos(this.gridPos);
+    this.pos.x = Math.round(this.pos.x);
+    this.pos.y = Math.round(this.pos.y);
   }
 
   draw (ctx){
-    ctx.beginPath();
-    this.texture.draw(ctx, this.pos, this.grid.gridDims);
-    ctx.closePath();
-
-    if(this.isNearPlayer){
+    if(this.isCulled && !this.isNearPlayer){
       ctx.beginPath();
-      ctx.fillStyle = "rgba(0, 255, 0, 0.4)";
-      ctx.fillRect(this.pos.x, this.pos.y, this.grid.gridDims.x, this.grid.gridDims.y);
+      ctx.fillStyle = "#000";
+      ctx.fillRect(this.pos.x, this.pos.y, Math.round(this.grid.gridDims.x), Math.round(this.grid.gridDims.y));
       ctx.closePath();
-      if(this.isMouseOver){
-        ctx.beginPath();
-        ctx.strokeStyle = "rgba(255, 0, 0, 1)";
-        ctx.strokeRect(this.pos.x, this.pos.y, this.grid.gridDims.x, this.grid.gridDims.y);
-        ctx.closePath();
+    }else{
+      ctx.beginPath();
+      this.texture.draw(ctx, this.pos, this.grid.gridDims);
+      ctx.closePath();
+      
+      if(this.isNearPlayer){
+        if(this.canPlayerMine()){
+          ctx.beginPath();
+          ctx.strokeStyle = "rgba(255, 0, 0, 1)";
+          ctx.strokeRect(this.pos.x, this.pos.y, this.grid.gridDims.x, this.grid.gridDims.y);
+          ctx.closePath();
+        }
       }
     }
   }
@@ -45,7 +52,7 @@ class Cell{
   }
 
   canPlayerMine () {
-    return this.isNearPlayer && this.isMouseOver;
+    return this.canMineCell && this.isMouseOver;
   }
 
   dig (deltaTime) {

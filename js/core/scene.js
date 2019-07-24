@@ -8,26 +8,34 @@ class Scene {
     this.objects = [];
     this.uiHandler = null;
     this.currentCamera = null;
-    this.isInitilized = false;
+    this.isInitialized = false;
   }
 
   init () {
-    if(this.isInitilized) {
+    if(this.isInitialized) {
       return;
     }
 
-    this.uiHandler = new UIHandler();
     this.currentCamera = new Camera(new Vector(0, 0), 
                             new Vector(this.sceneManager.game.options.width, this.sceneManager.game.options.height),
                             new Vector(this.sceneManager.game.options.width, this.sceneManager.game.options.height));
 
-    this.sceneManager.game.el.addEventListener('click', this.onClick.bind(this));
-    this.sceneManager.game.el.addEventListener('mousedown', this.onMouseDown.bind(this));
-    this.sceneManager.game.el.addEventListener('mouseup', this.onMouseUp.bind(this));
-    this.sceneManager.game.el.addEventListener('mousemove', this.onMouseMove.bind(this));
-    document.addEventListener('keydown', this.onKeyDown.bind(this));
-    document.addEventListener('keyup', this.onKeyUp.bind(this));
-    this.isInitilized = true;
+    
+    this.sceneManager.game.el.onclick = this.onClick.bind(this);
+    this.sceneManager.game.el.onmousedown = this.onMouseDown.bind(this);
+    this.sceneManager.game.el.onmouseup = this.onMouseUp.bind(this);
+    this.sceneManager.game.el.onmousemove = this.onMouseMove.bind(this);
+    this.sceneManager.game.el.onmouseover = this.onMouseOver.bind(this);
+    this.sceneManager.game.el.onmouseout = this.onMouseOut.bind(this);
+    document.onkeydown = this.onKeyDown.bind(this);
+    document.onkeyup = this.onKeyUp.bind(this);
+    this.isInitialized = true;
+
+    this.initUI();
+  }
+
+  initUI () {
+    this.uiHandler = new UIHandler();
   }
 
   resize (width, height) {
@@ -47,15 +55,17 @@ class Scene {
   }
 
   onMouseMove (e) {
+    this.uiHandler.resolveEvent('mouseout', e);
+    this.uiHandler.resolveEvent('mouseover', e);
     this.uiHandler.resolveEvent('mousemove', e);
   }
 
   onMouseOver (e) {
-    this.uiHandler.resolveEvent('mouseover', e);
+    // Implemented in child class
   }
 
   onMouseOut (e) {
-    this.uiHandler.resolveEvent('mouseout', e);
+    // Implemented in child class
   }
 
   onKeyDown (e) {
@@ -67,21 +77,27 @@ class Scene {
   }
 
   render (ctx) {
-    if(this.background){
-      this.background.draw(ctx, new Vector(0, 0), new Vector(this.sceneManager.game.options.width, this.sceneManager.game.options.height));
+    if(this.isInitialized){
+      if(this.background){
+        this.background.draw(ctx, new Vector(0, 0), new Vector(this.sceneManager.game.options.width, this.sceneManager.game.options.height));
+      }
+      this.currentCamera.begin(ctx);
+      this.objects.forEach(object => {
+        object.draw(ctx);
+      });
+      this.currentCamera.end(ctx);
+      this.uiHandler.render(ctx);
     }
-    this.currentCamera.begin(ctx);
-    this.objects.forEach(object => {
-      object.draw(ctx);
-    });
-    this.currentCamera.end(ctx);
   }
 
   update (deltaTime) {
-    this.currentCamera.update(deltaTime);
-    this.objects.forEach(object => {
-      object.update(deltaTime);
-    });
+    if(this.isInitialized){
+      this.currentCamera.update(deltaTime);
+      this.objects.forEach(object => {
+        object.update(deltaTime);
+      });
+      this.uiHandler.update(deltaTime);
+    }
   }
 
 }
@@ -91,37 +107,79 @@ class SceneManager {
   constructor (game, startSceneClass) {
     this.game = game;
     this.currentScene = new startSceneClass(this);
-    this.isInitilized = false;
+    this.isInitialized = false;
+    this.i = 0;
+    this.loadingDisplay = new Display(this.game.options.width, this.game.options.height);
+    this.game.el.appendChild(this.loadingDisplay.init());
+    this.game.el.style.position = "relative";
+    this.loadingDisplay.canvas.style.position = "absolute";
+    this.loadingDisplay.canvas.style.top = "0px";
+    this.loadingDisplay.canvas.style.left = "0px";
+    this.loadingDisplay.canvas.style.display = "block";
   }
 
   init () {
-    if(this.isInitilized){
+    if(this.isInitialized){
       return;
     }
-    if(this.currentScene){
-      this.currentScene.init();
+    this.showLoadingScreen();
+    setTimeout(() => {
+      if(this.currentScene){
+        this.currentScene.init();
+      }
+      this.isInitialized = true;
+    }, 100);
+  }
+
+  loadingScreen () {
+    this.loadingDisplay.clearColor("#000");
+    this.loadingDisplay.context.beginPath();
+    this.loadingDisplay.context.font = "20px Minecraft";
+    this.loadingDisplay.context.fillStyle = "#fff";
+    this.loadingDisplay.context.fillText("Loading"+".".repeat(this.i), this.game.options.width / 2, this.game.options.height / 2);
+    this.loadingDisplay.context.closePath();
+
+    this.i = (this.i + 1) % 3;
+    if(this.isInitialized){
+      window.cancelAnimationFrame(this.loading);
+      this.loadingDisplay.canvas.style.display = "none";
+    }else{
+      this.loading = window.requestAnimationFrame(this.loadingScreen.bind(this));
     }
   }
 
+  showLoadingScreen () {
+    this.loadingDisplay.canvas.style.display = "block";
+    this.isInitialized = false;
+    this.loading = this.loadingScreen();
+  }
+
+
   switchToScene (scene) {
-    this.currentScene = scene;
-    this.currentScene.init();
+    this.isInitialized = false;
+    this.showLoadingScreen();
+    setTimeout(() => {
+      this.currentScene = scene;
+      this.currentScene.init();
+      this.isInitialized = true;
+    }, 100);
   }
 
   render (ctx) {
-    if(this.currentScene){
+    if(this.currentScene && this.isInitialized){
       this.currentScene.render(ctx);
     }
   }
 
   update (deltaTime) {
-    if(this.currentScene){
+    if(this.currentScene && this.isInitialized){
       this.currentScene.update(deltaTime);
     }
   }
 
   resize (width, height){
     this.currentScene.resize(width, height);
+    this.loadingDisplay.resize(width, height);
   }
 
   set CurrentScene (scene) {

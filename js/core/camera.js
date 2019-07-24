@@ -42,7 +42,7 @@ class Camera{
 
 	begin (ctx) {
 		ctx.save();
-		ctx.translate(-this.pos.x, -this.pos.y);
+		ctx.translate(-Math.round(this.pos.x), -Math.round(this.pos.y));
 	}
 
 	end (ctx) {

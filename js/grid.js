@@ -6,6 +6,7 @@ class Grid {
 		this.pos = pos;
 		this.dims = dims;
 		this.gridDims = gridDims;
+		this.heights = [];
 
 		this.viewingDims = {
 			start: new Vector(),
@@ -29,7 +30,7 @@ class Grid {
 		}
 	}
 
-	update (deltaTime, camera) {
+	update (deltaTime, camera, playerPos) {
 		this.viewingDims.start = this.toGridPos(camera.pos);
 		this.viewingDims.start.x = Math.max(0, this.viewingDims.start.x - 1);
 		this.viewingDims.start.y = Math.max(0, this.viewingDims.start.y - 1);
@@ -38,15 +39,32 @@ class Grid {
 		this.viewingDims.end.x = Math.min(this.dims.x, this.viewingDims.end.x + 1);
 		this.viewingDims.end.y = Math.min(this.dims.y, this.viewingDims.end.y + 1);
 
-		
+		playerPos = this.toGridPos(playerPos.rounded());
+
 		for (let i = this.viewingDims.start.y; i < this.viewingDims.end.y; i++) {
 			for(let j = this.viewingDims.start.x; j < this.viewingDims.end.x; j++) {
 				let cell = this.cells[i][j];
 				if(cell != 0){
 					cell.isCollidingWithPlayer = false;
-					cell.isNearPlayer = false;
 					cell.isMouseOver = false;
 					cell.update(deltaTime);
+					let dist = Math.round(Vector.distance(playerPos, cell.gridPos));
+					if(dist < 2){
+						cell.canMineCell = true;
+						cell.isNearPlayer = true;
+					}else if(dist <= 3){
+						cell.isNearPlayer = true;
+						cell.canMineCell = false;
+					}else{
+						cell.isNearPlayer = false;
+						cell.canMineCell = false;
+					}
+
+					if(cell.gridPos.y <= this.heights[cell.gridPos.x] + 1){
+						cell.isCulled = false;
+					}else{
+						cell.isCulled = true;
+					}
 				}
 			}
 		}
@@ -90,7 +108,7 @@ class Grid {
 		}
 	}
 
-	hasTreeAt(gridPos) {
+	hasTreeAt (gridPos) {
 		let cell = this.cellAt(gridPos);
 		return cell && cell instanceof Trunk;
 	}
