@@ -18,7 +18,7 @@ class Display {
 
     this.context = this.canvas.getContext("2d");
     if(!this.context){
-      throw new Error("Canvas is not supported by this browser.");
+      throw new Error("Canvas is not supported by this b.dims.yer.");
     }
 
     this.isInitialized = true;

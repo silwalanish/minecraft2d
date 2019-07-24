@@ -1,5 +1,7 @@
 "use strict";
 
+const GRID_SIZE = 40;
+
 class MainMenuScene extends Scene{
 
   init () {
@@ -35,37 +37,92 @@ class NormalGameScene extends Scene{
     super.init();
 
     this.background = new Sprite("./images/Skies/day.png", 0, 0);
-    this.grid = new Grid(0, 0, this.sceneManager.game.options.width, this.sceneManager.game.options.width, 20);
-    this.player = new Steve(this.grid, 400, 300);
-    this.currentCamera.follow(this.player, this.sceneManager.game.options.width / 2, this.sceneManager.game.options.height / 2);
-    this.objects.push(this.player);
+    this.worldSize = new Vector(GRID_SIZE * 250, GRID_SIZE * 50);
+    this.currentCamera.world = this.worldSize;
+
+    this.grid = new Grid(new Vector(0, 0), new Vector(250, 50), new Vector(GRID_SIZE, GRID_SIZE));
+
+    this.player = new Steve(new Vector(200, 300), new Vector(GRID_SIZE * 1.5, GRID_SIZE * 1.5));
+    this.currentCamera.follow(this.player, new Vector(this.sceneManager.game.options.width / 2, 300));
     
-    for(let i = 0; i < 10; i ++){
-      this.objects.push(new GrassGround(this.grid, i, 8));
+    
+    let heightMap = new HeightMapGenerator(this.grid.dims.y - 5, 0.03);
+    this.heights = [];
+    for (let i = 0; i < this.grid.dims.x; i++) {
+      let height = Math.round(heightMap.height(i));
+      let peak = this.grid.dims.y - height;
+      this.heights.push(height);
+      for(let j = this.grid.dims.y - 1; j >= peak; j--) {
+        if(j >= this.grid.dims.y - 5){
+          this.grid.addObj(new StoneGround(this.grid, new Vector(i, j)));
+        }else if(j == peak){
+          this.grid.addObj(new GrassGround(this.grid, new Vector(i, j)));
+        }else{
+          let gold = Math.round(Math.random() * 100);
+          if(gold == 28){
+            this.grid.addObj(new GoldGround(this.grid, new Vector(i, j)));
+          }else{
+            this.grid.addObj(new DirtGround(this.grid, new Vector(i, j)));
+          }
+        }
+      }
+      let generateTree = Math.round(Math.random() * 10);
+      let j = peak;
+      if(generateTree == 2 && !this.grid.hasTreeAt(new Vector(i - 1, this.grid.dims.y - this.heights[i-1] - 1))){
+        this.grid.addObj(new Trunk(this.grid, new Vector(i, j-1)));
+        this.grid.addObj(new Trunk(this.grid, new Vector(i, j-2)));
+        this.grid.addObj(new Trunk(this.grid, new Vector(i, j-3), [
+          new Leaves(this.grid, new Vector(i-1, j-3)),
+          new Leaves(this.grid, new Vector(i+1, j-3)),
+          new Leaves(this.grid, new Vector(i-1, j-4)),
+          new Leaves(this.grid, new Vector(i, j-4)),
+          new Leaves(this.grid, new Vector(i+1, j-4)),
+          new Leaves(this.grid, new Vector(i-1, j-5)),
+          new Leaves(this.grid, new Vector(i, j-5)),
+          new Leaves(this.grid, new Vector(i+1, j-5))
+        ]));
+      }
     }
 
-    this.mousePos = [0, 0];
-    this.selectedGround = new GrassGround(this.grid, this.mousePos[0], this.mousePos[1]);
+    console.log("Map generated");
+
+    // console.log(grid.cells);
+    console.log(this.heights);
+
+    this.mousePos = new Vector(0, 0);
+    this.selectedGround = new GrassGround(this.grid, this.mousePos);
 
     this.isBuilding = false;
   }
 
   onClick (e) {
-    let pos = this.currentCamera.toViewCoord(e.clientX, e.clientY);
-    this.mousePos = this.grid.toGridCoord(pos[0], pos[1]);
+    let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY));
+    this.mousePos = this.grid.toGridPos(pos);
     
     if(this.isBuilding){
-      this.objects.push(new GrassGround(this.grid, this.mousePos[0], this.mousePos[1]));
+      this.grid.addObj(new GrassGround(this.grid, this.mousePos));
     }
+  }
+
+  
+
+  onMouseDown (e) {
+    this.player.mine();
+    console.log("Mining Started");
+    
+  }
+
+  onMouseUp (e) {
+    this.player.stopMinning();
   }
   
   onMouseMove (e) {
-    let pos = this.currentCamera.toViewCoord(e.clientX, e.clientY);  
-    this.mousePos = this.grid.toGridCoord(pos[0], pos[1]);
-
+    let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY)); 
+    this.mousePos = this.grid.toGridPos(pos);
+    this.grid.onMouseOver(this.mousePos);
+    
     if(this.isBuilding){
-      this.selectedGround.gridX = this.mousePos[0];
-      this.selectedGround.gridY = this.mousePos[1];
+      this.selectedGround.gridPos = this.mousePos;
     }
   }
 
@@ -76,7 +133,7 @@ class NormalGameScene extends Scene{
       this.player.moveRight();
     }
 
-    if(e.keyCode == 38 && this.player.canJump){
+    if(e.keyCode == 38 && this.player.isOnGround){
       this.player.jump();
     }
 
@@ -95,16 +152,53 @@ class NormalGameScene extends Scene{
     }
   }
 
+  resize (width, height) {
+    this.currentCamera.viewport = new Vector(width, height);
+    this.currentCamera.follow(this.player, new Vector(this.sceneManager.game.options.width / 2, 300));
+  }
+
   render (ctx) {
     super.render(ctx);
 
+    this.currentCamera.begin(ctx);
+    this.grid.render(ctx);
+
     if(this.isBuilding){
-      this.currentCamera.begin(ctx);
       ctx.globalAlpha = 0.5;
       this.selectedGround.draw(ctx);
       ctx.globalAlpha = 1;
-      this.currentCamera.end(ctx);
     }
+    this.player.draw(ctx);
+    this.currentCamera.end(ctx);
+    
+    
+    ctx.beginPath();
+    ctx.strokeStyle = "#000";
+    for(let i = 0; i < 250; i++){
+      ctx.lineTo(i + 20, 50 - this.heights[i]);
+    } 
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.beginPath();
+    let x = Math.floor(this.player.pos.x / this.grid.gridDims.x);
+    ctx.fillStyle = "#f00";
+    ctx.arc(x + 20, 50 - this.heights[x], 2, 0, Math.PI * 2, false);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.fillStyle = "gold";
+    ctx.textAlign = "center";
+    ctx.font = "20px Arial";
+    ctx.fillText(this.player.getGoldRewards(), 200, 200);
+    
+    ctx.fillStyle = "gray";
+    ctx.fillText(this.player.getStoneRewards(), 300, 200);
+    
+    ctx.fillStyle = "brown";
+    ctx.fillText(this.player.getWoodRewards(), 400, 200);
+    ctx.closePath();
   }
 
   update (deltaTime) {
@@ -112,56 +206,28 @@ class NormalGameScene extends Scene{
     if(this.isBuilding){
       this.selectedGround.update(deltaTime);
     }
-    let playerTL = this.grid.toGridCoord(this.player.x, this.player.y);
-    let playerTR = this.grid.toGridCoord(this.player.x + this.player.width, this.player.y);
-    let playerBL = this.grid.toGridCoord(this.player.x, this.player.y + this.player.height);
-    let playerBR = this.grid.toGridCoord(this.player.x + this.player.width, this.player.y + this.player.height);
 
-    let collisionBL = false;
-    let collisionBR = false;
-    let collisionTR = false;
-    let collisionTL = false;
-
-    for (let i = 0; i < this.objects.length; i++) {
-      const obj = this.objects[i];
-      if(obj == this.player){
-        continue;
-      }
-      if(obj.gridX == playerBR[0] && obj.gridY == playerBR[1]){
-        collisionBR = true;
-      }
-      
-      if(obj.gridX == playerBL[0] && obj.gridY == playerBL[1]){
-        collisionBL = true;
-      }
-      
-      if(obj.gridX == playerTR[0] && obj.gridY == playerTR[1]){
-        collisionTR = true;
-      }
-      
-      if(obj.gridX == playerTL[0] && obj.gridY == playerTL[1]){
-        collisionTL = true;
+    if(this.player.isMining){
+      let cell = this.grid.cellAt(this.mousePos);
+      if(cell && cell.canPlayerMine()){
+        let reward = cell.dig(deltaTime);
+        if(reward){
+          this.player.addReward(reward);
+        }
+        
+        if(cell.isDestroyed()){
+          this.grid.removeAt(this.mousePos);
+        }
       }
     }
 
-    if(collisionBL && collisionBR){
-      this.player.y = (playerBL[1]) * this.grid.gridSize - this.player.height;
-      this.player.canJump = true;
-      this.player.speedY = 0;
-    }else if(collisionBR){
-      this.player.x = (playerR[0]) * this.grid.gridSize - this.player.width;
-      this.player.speedX = 0;
-    }else if(collisionBL){
-      this.player.x = (playerBL[0]) * this.grid.gridSize - this.player.width;
-      this.player.speedX = 0;
-    }else{
-      this.player.canJump = false;
-    }
+    this.grid.update(deltaTime, this.currentCamera);
+    this.player.update(deltaTime);
+    this.grid.onMouseOver(this.mousePos);
 
-    if(collisionTL || collisionBL){
-      this.player.x = (playerTL[0] + 1) * this.grid.gridSize;
-      this.player.speedX = 0;
-    }
+
+    this.player.collideWithWorldBounds(this.worldSize);
+    this.player.collideWithGrid(this.grid);
   }
 
   endGame () {

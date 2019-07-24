@@ -1,71 +1,125 @@
 "use strict";
 
-class Grid{
+class Grid {
 
-  constructor (x, y, width, height, numGrids) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.numGrids = numGrids;
-    this.numRows = Math.ceil(this.height / this.numGrids);
-    this.cells = new Array(this.numRows).fill(new Array(this.numGrids).fill(null));
+	constructor (pos, dims, gridDims) {
+		this.pos = pos;
+		this.dims = dims;
+		this.gridDims = gridDims;
 
-    this.gridSize = this.width / this.numGrids;
-  }
+		this.viewingDims = {
+			start: new Vector(),
+			end: dims
+		};
 
-  resize (width, height) {
-    this.width = width;
-    this.height = height;
-    this.gridSize = this.width / this.numGrids;
-  }
+		this.cells = new Array(this.dims.y);
+		for (let i = 0; i < this.dims.y; i++){
+			this.cells[i] = new Array(this.dims.x).fill(0);
+		}
+	}
 
-  render (ctx) {
-    for(let i = 0; i < this.numRows; i++){
-      for(let j = 0; j < this.numGrids; j++){
-        let cell = this.cells[i][j];
-        if(cell){
-          ctx.beginPath();
-          ctx.fillStyle = "#fff";
-          ctx.fillRect(i * this.gridSize, j * this.gridSize, this.gridSize, this.gridSize);
-          ctx.closePath();
-        }
-      }
-    }
-  }
+	render (ctx) {
+		for (let i = this.viewingDims.start.y; i < this.viewingDims.end.y; i++) {
+			for(let j = this.viewingDims.start.x; j < this.viewingDims.end.x; j++) {
+				let cell = this.cells[i][j];
+				if(cell){
+					cell.draw(ctx);
+				}
+			}
+		}
+	}
 
-  update (deltaTime) {
-    for(let i = 0; i < this.numRows; i++){
-      for(let j = 0; j < this.numGrids; j++){
-        let cell = this.cells[i][j];
-        if(cell){
-          //cell.update(deltaTime);
-        }
-      }
-    }
-  }
+	update (deltaTime, camera) {
+		this.viewingDims.start = this.toGridPos(camera.pos);
+		this.viewingDims.start.x = Math.max(0, this.viewingDims.start.x - 1);
+		this.viewingDims.start.y = Math.max(0, this.viewingDims.start.y - 1);
+		
+		this.viewingDims.end = this.toGridPos(Vector.add(camera.pos, camera.viewport));
+		this.viewingDims.end.x = Math.min(this.dims.x, this.viewingDims.end.x + 1);
+		this.viewingDims.end.y = Math.min(this.dims.y, this.viewingDims.end.y + 1);
 
-  collide (gridPos) {
-    if(this.cells[gridPos[1]][gridPos[0]]){
-      return true;
-    }
-  }
+		
+		for (let i = this.viewingDims.start.y; i < this.viewingDims.end.y; i++) {
+			for(let j = this.viewingDims.start.x; j < this.viewingDims.end.x; j++) {
+				let cell = this.cells[i][j];
+				if(cell != 0){
+					cell.isCollidingWithPlayer = false;
+					cell.isNearPlayer = false;
+					cell.isMouseOver = false;
+					cell.update(deltaTime);
+				}
+			}
+		}
+	}
 
-  addObj (obj) {
-    this.cells[obj.gridY][obj.gridX] = true;
-  }
-  
-  toWorldCoord (x, y) {
-    return [
-      this.x + this.gridSize * x,
-      this.y + this.gridSize * y
-    ];
-  }
+	onMouseOver (mouseGridPos) {
+		if(this.isOnVisibleGrid(mouseGridPos)){
+			let cell = this.cells[mouseGridPos.y][mouseGridPos.x];
+			if(cell){
+				cell.isMouseOver = true;
+			}
+		}
+	}
 
-  toGridCoord (x, y) {
-    return [
-      Math.floor(x / this.gridSize),
-      Math.floor(y / this.gridSize)
-    ];
-  }
+	addObj (obj) {
+		this.cells[obj.gridPos.y][obj.gridPos.x] = obj;
+	}
+
+	hasGround (gridPos) {
+		if(!this.isOnGrid(gridPos)){
+			return false;
+		}
+		
+		if(this.cells[gridPos.y][gridPos.x].isGround){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	cellAt (gridPos) {
+		if(!this.isOnGrid(gridPos)){
+			return false;
+		}
+		return this.cells[gridPos.y][gridPos.x];
+	}
+
+	removeAt (gridPos) {
+		if(this.isOnGrid(gridPos)){
+			this.cells[gridPos.y][gridPos.x] = 0;
+		}
+	}
+
+	hasTreeAt(gridPos) {
+		let cell = this.cellAt(gridPos);
+		return cell && cell instanceof Trunk;
+	}
+
+	cellIsNearPlayer (gridPos) {
+		if (this.isOnGrid(gridPos)){
+			let cell = this.cells[gridPos.y][gridPos.x];
+			if(cell){
+				cell.isNearPlayer = true;
+			}
+		}
+	}
+
+	isOnGrid (gridPos) {
+		return (gridPos.x >= 0 && gridPos.x < this.dims.x) && 
+					 (gridPos.y >= 0 && gridPos.y < this.dims.y);
+	}
+
+	isOnVisibleGrid (gridPos) {
+		return (gridPos.x >= this.viewingDims.start.x && gridPos.x < this.viewingDims.end.x) && 
+					 (gridPos.y >= this.viewingDims.start.y && gridPos.y < this.viewingDims.end.y);
+	}
+
+	toWorldPos (gridPos) {
+		return new Vector(this.gridDims.x * gridPos.x, this.gridDims.y * gridPos.y);
+	}
+
+	toGridPos (worldPos) {
+		return new Vector(Math.floor(worldPos.x / this.gridDims.x), Math.floor(worldPos.y / this.gridDims.y));
+	}
+
 }

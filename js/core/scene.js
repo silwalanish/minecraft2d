@@ -6,6 +6,7 @@ class Scene {
     this.sceneManager = sceneManager;
     this.background = null;
     this.objects = [];
+    this.uiHandler = null;
     this.currentCamera = null;
     this.isInitilized = false;
   }
@@ -15,9 +16,14 @@ class Scene {
       return;
     }
 
-    this.currentCamera = new Camera(0, 0, this.sceneManager.game.options.width, this.sceneManager.game.options.height);
+    this.uiHandler = new UIHandler();
+    this.currentCamera = new Camera(new Vector(0, 0), 
+                            new Vector(this.sceneManager.game.options.width, this.sceneManager.game.options.height),
+                            new Vector(this.sceneManager.game.options.width, this.sceneManager.game.options.height));
 
     this.sceneManager.game.el.addEventListener('click', this.onClick.bind(this));
+    this.sceneManager.game.el.addEventListener('mousedown', this.onMouseDown.bind(this));
+    this.sceneManager.game.el.addEventListener('mouseup', this.onMouseUp.bind(this));
     this.sceneManager.game.el.addEventListener('mousemove', this.onMouseMove.bind(this));
     document.addEventListener('keydown', this.onKeyDown.bind(this));
     document.addEventListener('keyup', this.onKeyUp.bind(this));
@@ -29,11 +35,27 @@ class Scene {
   }
 
   onClick (e) {
-    // Implemented in child class
+    this.uiHandler.resolveEvent('click', e);
+  }
+
+  onMouseDown (e) {
+    this.uiHandler.resolveEvent('mousedown', e);
+  }
+
+  onMouseUp (e) {
+    this.uiHandler.resolveEvent('mouseup', e);
   }
 
   onMouseMove (e) {
-    // Implemented in child class
+    this.uiHandler.resolveEvent('mousemove', e);
+  }
+
+  onMouseOver (e) {
+    this.uiHandler.resolveEvent('mouseover', e);
+  }
+
+  onMouseOut (e) {
+    this.uiHandler.resolveEvent('mouseout', e);
   }
 
   onKeyDown (e) {
@@ -46,7 +68,7 @@ class Scene {
 
   render (ctx) {
     if(this.background){
-      this.background.draw(ctx, 0, 0, this.sceneManager.game.options.width, this.sceneManager.game.options.height);
+      this.background.draw(ctx, new Vector(0, 0), new Vector(this.sceneManager.game.options.width, this.sceneManager.game.options.height));
     }
     this.currentCamera.begin(ctx);
     this.objects.forEach(object => {

@@ -3,7 +3,7 @@
 class Sprite{
 
   constructor (imgSrc, sx, sy, sw, sh) {
-    this.imgSrc = imgSrc;
+    this.image = imgSrc;
     this.sx = sx;
     this.sy = sy;
     this.sw = sw || false;
@@ -12,7 +12,13 @@ class Sprite{
     this.loaded = false;
     this.pattern = false;
 
-    this.load();
+    if(!(imgSrc instanceof Image)){
+      this.imgSrc = imgSrc;
+      this.load();
+    }else{
+      this.image = imgSrc;
+      this.loaded = true;
+    }
   }
 
   createPattern (repeat) {
@@ -35,15 +41,15 @@ class Sprite{
     this.image.src = this.imgSrc;
   }
 
-  draw (ctx, x, y, w, h) {
+  draw (ctx, pos, dims) {
     if(this.loaded){
       if(this.pattern){
         ctx.save();
         ctx.fillStyle = ctx.createPattern(this.image, this.imagePattern);
-        ctx.fillRect(x, y, w, h);
+        ctx.fillRect(pos.x, pos.y, dims.x, dims.y);
         ctx.restore();
       }else{
-        ctx.drawImage(this.image, this.sx, this.sy, this.sw, this.sh, x, y, w, h);
+        ctx.drawImage(this.image, this.sx, this.sy, this.sw, this.sh, pos.x, pos.y, dims.x, dims.y);
       }
       return true;
     }
@@ -69,11 +75,11 @@ class SpriteAnimation{
     this.sprite.sx = this.startIndex * this.sprite.sw;
   }
 
-  render (ctx, x, y, w, h) {
+  render (ctx, pos, dims) {
     this.sprite.sx = this.currentIndex * this.sprite.sw;
-    if(!this.sprite.draw(ctx, x, y, w, h)){
+    if(!this.sprite.draw(ctx, pos, dims)){
       ctx.fillStyle = this.color;
-      ctx.fillRect(x, y, w, h);
+      ctx.fillRect(pos.x, pos.y, dims.x, dims.y);
     }
   }
 

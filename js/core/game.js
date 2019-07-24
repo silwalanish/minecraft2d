@@ -3,13 +3,9 @@
 const GAME_DEFAULT_OPTIONS = {
   width: 800,
   height: 600,
-  backgroundColor: {
-    r: 0,
-    g: 0,
-    b: 0,
-    a: 1
-  },
-  fullScreen: false
+  backgroundColor: "#000",
+  fullScreen: false,
+  worldSteps: 1
 };
 
 class Game {
@@ -58,7 +54,7 @@ class Game {
   }
 
   render () {
-    this.display.clearColor(`rgba(${this.options.backgroundColor.r}, ${this.options.backgroundColor.g}, ${this.options.backgroundColor.b}, ${this.options.backgroundColor.a})`);
+    this.display.clearColor(this.options.backgroundColor);
     this.sceneManager.render(this.display.context);
   }
 
@@ -68,7 +64,9 @@ class Game {
     this.startTime = currentTime;
 
     this.render();
-    this.update(deltaTime);
+    for(let i = 0; i < this.options.worldSteps; i++){
+      this.update(deltaTime / this.options.worldSteps);
+    }
 
     window.requestAnimationFrame(this.gameloop.bind(this));
   }
