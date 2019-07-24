@@ -92,8 +92,19 @@ class WoodGround extends Cell{
 
 class StoneGround extends Cell{
   
-  constructor (grid, pos){
+  constructor (grid, pos, stoneAmount){
     super(grid, pos, new Sprite("./images/Minecraft/Stone.PNG", 0, 0));
+    this.stoneAmount = stoneAmount || 200;
+  }
+
+  
+  dig (deltaTime) {
+    super.dig(deltaTime);
+    if(this.stoneAmount > 0){
+      this.stoneAmount -= 10;
+      return { rewardType: "Stone", reward: 10 };
+    }
+    this.destroyed = 1;
   }
 
 }

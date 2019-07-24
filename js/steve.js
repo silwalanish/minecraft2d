@@ -4,7 +4,7 @@ const DEFAULT_STEVE_OPTIONS = {
   gravity: 200,
   vel: new Vector(100, 0),
   sprite: GetAssetsLoader().loadImage("./images/Steve/anim-sheet.png"),
-  jumpForce: 120
+  jumpForce: 140
 };
 
 class Steve{
@@ -42,11 +42,17 @@ class Steve{
     };
 
     this.isOnGround = false;
+
+    this.collider = new Collider(this);
   }
 
   jump () {
     this.vel.y = -this.options.jumpForce;
     this.isOnGround = false;
+    if(this.animation){
+      this.animation.reset();
+      this.animation = null;
+    }
   }
 
   moveLeft () {
@@ -80,6 +86,11 @@ class Steve{
     if(this.animation){
       this.animation.render(ctx, new Vector(-this.dims.x / 2, -this.dims.y / 2), this.dims);
     }else if(this.spriteSheet){
+      if(!this.isOnGround && this.isWalking){
+        this.spriteSheet.sx = this.spriteSheet.sw;
+      }else{
+        this.spriteSheet.sx = 0;
+      }
       this.spriteSheet.draw(ctx, new Vector(-this.dims.x / 2, -this.dims.y / 2), this.dims);
     }
     ctx.strokeStyle = "#fff";
@@ -135,51 +146,6 @@ class Steve{
     }else if(this.pos.y > (worldSize.y - this.dims.y)){
       this.pos.y = worldSize.y - this.dims.y;
       this.vel.y = 0;
-    }
-  }
-
-  collideWithGrid (grid) 
-  {
-    let TL = grid.toGridPos(this.pos);
-    let TR = grid.toGridPos(Vector.add(this.pos, new Vector(this.dims.x, 0)));
-    let BL = grid.toGridPos(Vector.add(this.pos, new Vector(0, this.dims.y)));
-    let BR = grid.toGridPos(Vector.add(this.pos, this.dims));
-
-    let startX = Math.max(TL.x, 0);
-    let startY = Math.max(TL.y, 0);
-    let endX = Math.min(BR.x, grid.dims.x);
-    let endY = Math.min(BR.y, grid.dims.y);
-    
-    // grid.cellIsNearPlayer(Vector.sub(TL, new Vector(1, 0)));
-    // grid.cellIsNearPlayer(Vector.sub(TL, new Vector(0, 1)));
-    // grid.cellIsNearPlayer(Vector.sub(TL, new Vector(1, 1)));
-
-    // grid.cellIsNearPlayer(Vector.add(TR, new Vector(1, 0)));
-    // grid.cellIsNearPlayer(Vector.sub(TR, new Vector(0, 1)));
-    // grid.cellIsNearPlayer(Vector.add(TR, new Vector(1, -1)));
-    // grid.cellIsNearPlayer(Vector.sub(BL, new Vector(1, 0)));
-    // grid.cellIsNearPlayer(Vector.add(BR, new Vector(1, 0)));
-    
-    for (let i = startX; i <= endX; i++) {
-      for (let j = startY; j <= endY; j++) {
-        let cell = grid.cellAt(new Vector(i, j));
-        if(cell){
-          grid.cells[j][i].isCollidingWithPlayer = true;
-        }
-      }
-    }
-
-    let collidesTL = grid.hasGround(TL);
-    let collidesTR = grid.hasGround(TR); 
-    let collidesBL = grid.hasGround(BL);
-    let collidesBR = grid.hasGround(BR);
-
-    if(collidesBL || collidesBR){
-      this.pos.y = (BL.y) * grid.gridDims.y - this.dims.y;
-      this.vel.y = -this.vel.y * 0.01;
-      this.isOnGround = true;
-    }else{
-      this.isOnGround = false;
     }
   }
 

@@ -80,7 +80,9 @@ class Grid {
 	}
 
 	addObj (obj) {
-		this.cells[obj.gridPos.y][obj.gridPos.x] = obj;
+		if(this.isOnGrid(obj.gridPos) && !this.cellAt(obj.gridPos)){
+			this.cells[obj.gridPos.y][obj.gridPos.x] = obj;
+		}
 	}
 
 	hasGround (gridPos) {
@@ -111,6 +113,10 @@ class Grid {
 	hasTreeAt (gridPos) {
 		let cell = this.cellAt(gridPos);
 		return cell && cell instanceof Trunk;
+	}
+
+	canAddTreeAt (gridPos) {
+		
 	}
 
 	cellIsNearPlayer (gridPos) {

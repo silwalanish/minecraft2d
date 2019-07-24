@@ -86,7 +86,6 @@ class Scene {
         object.draw(ctx);
       });
       this.currentCamera.end(ctx);
-      this.uiHandler.render(ctx);
     }
   }
 
@@ -98,6 +97,10 @@ class Scene {
       });
       this.uiHandler.update(deltaTime);
     }
+  }
+
+  renderUI (ctx) {
+    this.uiHandler.render(ctx);
   }
 
 }
@@ -168,6 +171,7 @@ class SceneManager {
   render (ctx) {
     if(this.currentScene && this.isInitialized){
       this.currentScene.render(ctx);
+      this.currentScene.renderUI(ctx);
     }
   }
 

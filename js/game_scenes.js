@@ -13,12 +13,21 @@ class MainMenuScene extends Scene{
       this.background.createPattern("repeat");
       return img;
     });
+    GetAssetsLoader().loadImage("./images/gold_block.png", (img) => {
+      return new Sprite(img, 0, 0, img.width, img.height);
+    });
+    GetAssetsLoader().loadImage("./images/birch_planks.png", (img) => {
+      return new Sprite(img, 0, 0, img.width, img.height);
+    });
+    GetAssetsLoader().loadImage("./images/cobblestone.png", (img) => {
+      return new Sprite(img, 0, 0, img.width, img.height);
+    });
   }
 
   initUI () {
     super.initUI();
 
-    let title = new UIText("MINECRAFT", new Vector(this.sceneManager.game.options.width / 2, 120), "#fff", 100);
+    let title = new UIText("MINECRAFT", new Vector(this.sceneManager.game.options.width / 2, 100), "#fff", 100);
     title.fontWeight = "900";
     title.fillWithImage(GetAssetsLoader().loadImage("./images/Minecraft/Leaves.png"));
     
@@ -120,14 +129,14 @@ class ChooseMapScene extends Scene{
     this.errorText = new UIText("", new Vector(this.sceneManager.game.options.width / 2, this.sceneManager.game.options.height - 150), "#f00", 30);
     this.uiHandler.register(this.errorText);
 
-    let title = new UIText("CHOOSE MAP", new Vector(this.sceneManager.game.options.width / 2, 120), "#fff", 100);
+    let title = new UIText("CHOOSE MAP", new Vector(this.sceneManager.game.options.width / 2, 100), "#fff", 100);
     title.fontWeight = "900";
 
-    let mapTypeText = new UIText("Map Type:", new Vector(200, 200), "#fff", 50);
+    let mapTypeText = new UIText("Map Type:", new Vector(200, 190), "#fff", 50);
 
-    let smallMap = new UIButton("Small", new Vector(400, 190), new Vector(80, 30), "#fff", 20);
-    let mediumMap = new UIButton("Medium", new Vector(490, 190), new Vector(80, 30), "#fff", 20);
-    let largeMap = new UIButton("Large", new Vector(580, 190), new Vector(80, 30), "#fff", 20);
+    let smallMap = new UIButton("Small", new Vector(400, 200), new Vector(80, 30), "#fff", 20);
+    let mediumMap = new UIButton("Medium", new Vector(490, 200), new Vector(80, 30), "#fff", 20);
+    let largeMap = new UIButton("Large", new Vector(580, 200), new Vector(80, 30), "#fff", 20);
 
     smallMap.borderColor = "#000";
     mediumMap.borderColor = "#000";
@@ -185,8 +194,10 @@ class ChooseMapScene extends Scene{
         largeMap.background.image = null;
       }
     });
-    
-    let customMapChooser = new UIButton("Choose Custom Map", new Vector(this.sceneManager.game.options.width / 2, 300), new Vector(300, 50), "#000", 20);
+
+    this.uiHandler.register(new UIText("Or,", new Vector(500, 250), "#fff", 30));
+
+    let customMapChooser = new UIButton("Choose Custom Map", new Vector(500, 300), new Vector(300, 50), "#fff", 20);
     customMapChooser.background.image = GetAssetsLoader().loadImage("./images/Minecraft/Grass.png");
     customMapChooser.borderColor = "#000";
     customMapChooser.borderSize = 2;
@@ -312,7 +323,7 @@ class NormalGameScene extends Scene{
     this.worldSize = new Vector(GRID_SIZE * this.map.size.x, GRID_SIZE * this.map.size.y);
     this.currentCamera.world = this.worldSize;
 
-    this.player = new Steve(playerPos, new Vector(GRID_SIZE, GRID_SIZE));
+    this.player = new Steve(playerPos, new Vector(GRID_SIZE * 0.9, GRID_SIZE * 0.9));
     this.currentCamera.follow(this.player, new Vector(this.sceneManager.game.options.width / 2, 300));
 
     this.mousePos = new Vector(0, 0);
@@ -321,6 +332,17 @@ class NormalGameScene extends Scene{
     this.isBuilding = false;
     
     this.isInitialized = true;
+  }
+
+  initUI () {
+    super.initUI();
+    this.goldCounts = new UIText("0", new Vector(45, 17), "gold", 20);
+    this.woodCounts = new UIText("0", new Vector(200, 17), "brown", 20);
+    this.stoneCounts = new UIText("0", new Vector(355, 17), "gray", 20);
+    this.goldCounts.textAlign = this.woodCounts.textAlign = this.stoneCounts.textAlign = "left";
+    this.uiHandler.register(this.goldCounts);
+    this.uiHandler.register(this.woodCounts);
+    this.uiHandler.register(this.stoneCounts);
   }
 
   onClick (e) {
@@ -334,8 +356,6 @@ class NormalGameScene extends Scene{
 
   onMouseDown (e) {
     this.player.mine();
-    console.log("Mining Started");
-    
   }
 
   onMouseUp (e) {
@@ -398,16 +418,15 @@ class NormalGameScene extends Scene{
     this.currentCamera.end(ctx);
     
     ctx.beginPath();
-    ctx.fillStyle = "gold";
-    ctx.textAlign = "center";
-    ctx.font = "20px Arial";
-    ctx.fillText(this.player.getGoldRewards(), 200, 200);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.fillRect(0, 0, this.sceneManager.game.options.width, 40);
     
-    ctx.fillStyle = "gray";
-    ctx.fillText(this.player.getStoneRewards(), 300, 200);
-    
-    ctx.fillStyle = "brown";
-    ctx.fillText(this.player.getWoodRewards(), 400, 200);
+    GetAssetsLoader().assets["./images/gold_block.png"].draw(ctx, new Vector(10, 10), new Vector(20, 20));
+    GetAssetsLoader().assets["./images/birch_planks.png"].draw(ctx, new Vector(165, 10), new Vector(20, 20));
+    GetAssetsLoader().assets["./images/cobblestone.png"].draw(ctx, new Vector(320, 10), new Vector(20, 20));
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.fillRect(0, this.sceneManager.game.options.height - 40, this.sceneManager.game.options.width, 40);
     ctx.closePath();
   }
 
@@ -442,9 +461,12 @@ class NormalGameScene extends Scene{
     this.player.update(deltaTime);
     this.map.grid.onMouseOver(this.mousePos);
 
-
     this.player.collideWithWorldBounds(this.worldSize);
-    this.player.collideWithGrid(this.map.grid);
+    this.player.collider.handleCollision(this.map.grid);
+
+    this.goldCounts.text = this.player.getGoldRewards().toString();
+    this.stoneCounts.text = this.player.getStoneRewards().toString();
+    this.woodCounts.text = this.player.getWoodRewards().toString();
   }
 
   endGame () {

@@ -172,7 +172,7 @@ class UIElement{
 class UIText extends UIElement{
 
   constructor (text, pos, color = "#000", fontSize = 16, fontFamily = "Minecraft") {
-    super(pos, new Vector(fontSize * text.length + 10, fontSize + 10));
+    super(pos, new Vector(fontSize * text.length, fontSize));
     this.text = text;
     this.color = color;
     this.fontWeight = "normal";
@@ -193,7 +193,7 @@ class UIText extends UIElement{
     ctx.textAlign = this.textAlign;
     ctx.fillStyle = this.image ? ctx.createPattern(this.image, "repeat") : this.color;
     ctx.font = `${this.fontWeight} ${this.fontSize}px ${this.fontFamily}`;
-    ctx.fillText(this.text, this.pos.x, this.pos.y + this.dims.y / 2 - this.fontSize / 2);
+    ctx.fillText(this.text, this.pos.x, this.pos.y + this.dims.y / 2);
     ctx.restore();
     ctx.closePath();
   }
