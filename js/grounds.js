@@ -10,7 +10,6 @@ class Cell{
     this.isMouseOver = false;
     this.isNearPlayer = false;
     this.canMineCell = false;
-    this.isCollidingWithPlayer = false;
     this.isGround = true;
     this.isCulled = false;
 

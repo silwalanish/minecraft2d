@@ -105,7 +105,7 @@ class ChooseMapScene extends Scene{
     this.background = GetAssetsLoader().loadImage("./images/Minecraft/Stone.png");
     this.background.createPattern("repeat");
     this.mapType = null;
-    this.customMap = null;
+    this.customMapData = null;
   }
 
   initUI () {
@@ -199,14 +199,19 @@ class ChooseMapScene extends Scene{
     customMapChooser.setEventListener('click', () =>{
       let mapName = prompt("Enter the map name: ");
       if(mapName){
-        let map = localStorage.getItem("minecraft-map__"+mapName.toLowerCase());
-        if(map){
-          this.customMap = map;
+        let mapData = localStorage.getItem("minecraft-map__"+mapName.toLowerCase());
+        
+        if(mapData){
+          this.customMapData = JSON.parse(mapData);
+          this.choosedText.text = "Map choosen: "+mapName;
         }else{
           this.errorText.text = "Map not found.";
         }
       }
     });
+
+    this.choosedText = new UIText("", new Vector(500, 400), "#0f0", 30);
+    this.uiHandler.register(this.choosedText);
 
     let chooseBtn = new UIButton("Choose", new Vector(this.sceneManager.game.options.width / 2 + 80, this.sceneManager.game.options.height - 100), 
     new Vector(120, 50), "#fff", 20);
@@ -257,10 +262,10 @@ class ChooseMapScene extends Scene{
   }
 
   choose () {
-    if(this.mapType != null || this.customMap != null){
+    if(this.mapType != null || this.customMapData != null){
       let map;
-      if(this.customMap){
-        map = this.customMap;
+      if(this.customMapData){
+        map = new CustomMap(this.customMapData.size, this.customMapData.grid, this.customMapData.heights, this.customMapData.spawnPos);
       }else{
         let size;
         switch (this.mapType) {
@@ -288,30 +293,156 @@ class ChooseMapScene extends Scene{
 
 }
 
-class NormalGameScene extends Scene{
+class GameScene extends Scene {
 
   constructor (sceneManager, map) {
     super(sceneManager);
     this.map = map;
-    this.timer = 0;
-    this.frames = 0;
+    this.timer = 0;    
   }
+
+  init () {
+    super.init();
+    this.className = GameScene;
+    this.isInitialized = false;
+
+    this.background = new Sprite("./images/Skies/day.png", 0, 0);
+
+    this.spawnPos = this.map.generate(this);
+
+    this.worldSize = new Vector(GRID_SIZE * this.map.size.x, GRID_SIZE * this.map.size.y);
+    this.currentCamera.world = this.worldSize;
+
+    this.mousePos = new Vector(0, 0);
+
+    this.foods = [];
+
+    this.isInitialized = true;
+  }
+
+  initUI () {
+    super.initUI();
+
+    this.quitBtn = new UIButton("Quit", new Vector(this.sceneManager.game.options.width - 80, 20), new Vector(80, 30), "#fff", 20);
+    this.quitBtn.borderColor = "#f00";
+    this.quitBtn.setEventListener("mouseover", () => {
+      this.quitBtn.background.color = "#f00";
+    });
+    this.quitBtn.setEventListener("click", () => {
+      this.endGame();
+    });
+    this.quitBtn.setEventListener("mouseout", () => {
+      this.quitBtn.background.color = null;
+    });
+
+    this.helpText = new UIText("USE W/A/S/D or Arrow Keys to move. Press B to toggle Build/Mine mode.", 
+      new Vector(this.sceneManager.game.options.width / 2, this.sceneManager.game.options.height - 20), "#000", 20);
+ 
+    this.uiHandler.register(this.helpText);
+    this.uiHandler.register(this.quitBtn);
+  }
+  
+  onClick (e) {
+    super.onClick(e);
+    let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY));
+    this.mousePos = this.map.grid.toGridPos(pos);
+  }
+
+  
+  onMouseDown (e) {
+    super.onMouseDown(e);
+    let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY)); 
+    this.mousePos = this.map.grid.toGridPos(pos);
+  }
+
+  onMouseUp (e) {
+    super.onMouseUp(e);
+    let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY)); 
+    this.mousePos = this.map.grid.toGridPos(pos);
+  }
+
+  onMouseMove (e) {
+    super.onMouseMove(e);
+    let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY)); 
+    this.mousePos = this.map.grid.toGridPos(pos);
+    this.map.grid.onMouseOver(this.mousePos);
+  }
+  
+  resize (width, height) {
+    this.currentCamera.viewport = new Vector(width, height);
+  }
+
+  
+  render (ctx) {
+    super.render(ctx);
+
+    this.currentCamera.begin(ctx);
+    
+    this.map.render(ctx);
+
+    this.foods.forEach(food => {
+      food.draw(ctx);
+    });
+
+    this.currentCamera.end(ctx);
+
+  }
+
+  
+  update (deltaTime) {
+    super.update(deltaTime);
+    this.timer += deltaTime;
+  }
+
+  
+  addFood () {
+    if(this.foods.length < 10){
+      let x = Math.round(Math.random() * this.map.size.x);
+      let y = Math.round(this.map.heightAt(x));
+      y = this.map.size.y - y;
+      this.foods.push(new Food(this.map.grid.toWorldPos(new Vector(x, y - 1))));
+    }
+  }
+
+  addTree (i, j) {
+    if(!this.map.grid.hasTreeAt(new Vector(i - 1, this.map.size.y - Math.round(this.map.heightAt(i - 1)) - 1)) && 
+      !this.map.grid.hasTreeAt(new Vector(i + 1, this.map.size.y - Math.round(this.map.heightAt(i + 1)) - 1)) &&
+      this.map.grid.cellAt(new Vector(i, j)) instanceof GrassGround)
+    {
+      this.map.grid.addObj(new Trunk(this.map.grid, new Vector(i, j-1)));
+      this.map.grid.addObj(new Trunk(this.map.grid, new Vector(i, j-2)));
+      this.map.grid.addObj(new Trunk(this.map.grid, new Vector(i, j-3), [
+        new Leaves(this.map.grid, new Vector(i-1, j-3)),
+        new Leaves(this.map.grid, new Vector(i+1, j-3)),
+        new Leaves(this.map.grid, new Vector(i-1, j-4)),
+        new Leaves(this.map.grid, new Vector(i, j-4)),
+        new Leaves(this.map.grid, new Vector(i+1, j-4)),
+        new Leaves(this.map.grid, new Vector(i-1, j-5)),
+        new Leaves(this.map.grid, new Vector(i, j-5)),
+        new Leaves(this.map.grid, new Vector(i+1, j-5))
+      ]));
+      return true;
+    }
+    return false;
+  }
+
+  endGame () {
+    this.sceneManager.switchToScene(new GameEndScene(this.sceneManager, this.className));
+  }
+
+}
+
+class NormalGameScene extends GameScene{
 
   init () {
     super.init();
     this.isInitialized = false;
 
-    this.background = new Sprite("./images/Skies/day.png", 0, 0);
+    this.className = NormalGameScene;
 
-    let playerPos = this.map.generate();
-
-    this.worldSize = new Vector(GRID_SIZE * this.map.size.x, GRID_SIZE * this.map.size.y);
-    this.currentCamera.world = this.worldSize;
-
-    this.player = new Steve(playerPos, new Vector(GRID_SIZE * 0.9, GRID_SIZE * 0.9));
+    this.player = new Steve(this.spawnPos, new Vector(GRID_SIZE * 0.9, GRID_SIZE * 0.9));
     this.currentCamera.follow(this.player, new Vector(this.sceneManager.game.options.width / 2, 300));
 
-    this.mousePos = new Vector(0, 0);
     this.selectedGround = new GrassGround(this.map.grid, this.mousePos);
     this.selectedGround.isCulled = false;
 
@@ -336,22 +467,6 @@ class NormalGameScene extends Scene{
     this.stoneCounts.textAlign = "left";
     this.foodCounts.textAlign = "left";
 
-    this.quitBtn = new UIButton("Quit", new Vector(this.sceneManager.game.options.width - 80, 20), new Vector(80, 30), "#fff", 20);
-    this.quitBtn.borderColor = "#f00";
-    this.quitBtn.setEventListener("mouseover", () => {
-      this.quitBtn.background.color = "#f00";
-    });
-    this.quitBtn.setEventListener("click", () => {
-      this.endGame();
-    });
-    this.quitBtn.setEventListener("mouseout", () => {
-      this.quitBtn.background.color = null;
-    });
-
-    this.helpText = new UIText("USE W/A/S/D or Arrow Keys to move. Press B to toggle Build/Mine mode.", new Vector(this.sceneManager.game.options.width / 2, this.sceneManager.game.options.height - 20), "#000", 20);
-
-    this.uiHandler.register(this.helpText)
-    this.uiHandler.register(this.quitBtn);
     this.uiHandler.register(this.goldCounts);
     this.uiHandler.register(this.woodCounts);
     this.uiHandler.register(this.stoneCounts);
@@ -363,9 +478,6 @@ class NormalGameScene extends Scene{
 
   onClick (e) {
     super.onClick(e);
-    let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY));
-    this.mousePos = this.map.grid.toGridPos(pos);
-    
     if(this.player.isBuilding && this.map.grid.isEmpty(this.mousePos)){
       this.map.grid.addObj(new GrassGround(this.map.grid, this.mousePos));
     }
@@ -373,8 +485,6 @@ class NormalGameScene extends Scene{
 
   onMouseDown (e) {
     super.onMouseDown(e);
-    let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY)); 
-    this.mousePos = this.map.grid.toGridPos(pos);
     let playerGridPos = this.map.grid.toGridPos(this.player.pos.rounded());
     if(Vector.distance(this.mousePos, playerGridPos) <= 2){
       if(playerGridPos.x > this.mousePos.x){
@@ -388,20 +498,13 @@ class NormalGameScene extends Scene{
 
   onMouseUp (e) {
     super.onMouseUp(e);
-    let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY)); 
-    this.mousePos = this.map.grid.toGridPos(pos);
     this.player.stopMinning();
   }
   
   onMouseMove (e) {
     super.onMouseMove(e);
-    let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY)); 
-    this.mousePos = this.map.grid.toGridPos(pos);
-    this.map.grid.onMouseOver(this.mousePos);
     
     if(this.player.isBuilding && this.map.grid.isEmpty(this.mousePos)){
-      console.log(this.map.grid.isEmpty(this.mousePos));
-      
       this.selectedGround.gridPos = this.mousePos;
     }
   }
@@ -421,23 +524,19 @@ class NormalGameScene extends Scene{
     }
   }
 
-  resize (width, height) {
-    this.currentCamera.viewport = new Vector(width, height);
-    this.currentCamera.follow(this.player, new Vector(this.sceneManager.game.options.width / 2, 300));
-  }
-
   render (ctx) {
     super.render(ctx);
-
+    
     this.currentCamera.begin(ctx);
-    this.map.render(ctx);
 
     if(this.player.isBuilding){
       ctx.globalAlpha = 0.5;
       this.selectedGround.draw(ctx);
       ctx.globalAlpha = 1;
     }
+
     this.player.draw(ctx);
+    
     this.currentCamera.end(ctx);
     
     ctx.beginPath();
@@ -472,13 +571,21 @@ class NormalGameScene extends Scene{
 
   update (deltaTime) {
     super.update(deltaTime);
-    this.timer += deltaTime;
-    this.frames++;
-    if(this.timer > 10){
+
+    if(this.timer > 15){
+      let x = Math.round(Math.random() * this.map.size.x);
+      let tries = 0;
+      while (tries < 10){
+        if(this.addTree(x, this.map.size.y - Math.round(this.map.heightAt(x)))) {
+          break;
+        }
+        x = Math.round(Math.random() * this.map.size.x);
+        tries++;
+      }
+      this.addFood();
       this.timer = 0;
-      console.log(this.frames / 10);
-      this.frames = 0;
     }
+
     if(this.player.isBuilding){
       this.selectedGround.update(deltaTime);
     }
@@ -497,12 +604,20 @@ class NormalGameScene extends Scene{
       }
     }
 
-    this.map.update(deltaTime, this.currentCamera, this.player);
     this.player.update(deltaTime);
+    this.map.update(deltaTime, this.currentCamera, this.player);
     this.map.grid.onMouseOver(this.mousePos);
 
+    for(let i = 0; i < this.foods.length; i++){
+      this.foods[i].update(deltaTime, this.map.grid, this.player);
+      if(this.foods[i].isCollected){
+        this.foods.splice(i, 1);
+        i--;
+      }
+    }
+
     this.player.collideWithWorldBounds(this.worldSize);
-    this.player.collider.handleCollision(this.map.grid);
+    this.player.collider.handleCollision(this.map.grid);    
 
     this.goldCounts.text = this.player.getGoldRewards().toString();
     this.stoneCounts.text = this.player.getStoneRewards().toString();
@@ -516,11 +631,122 @@ class NormalGameScene extends Scene{
     }
   }
 
-  endGame () {
-    this.sceneManager.switchToScene(new GameEndScene(this.sceneManager, NormalGameScene));
+}
+
+class CreativeGameScene extends GameScene{
+
+  init () {
+    super.init();
+    this.isInitialized = false;
+    
+    this.className = CreativeGameScene;
+    
+    this.currentCamera.pos = this.spawnPos;
+    this.currentCamera.collideWithWorldBounds();
+
+    this.selectedGround = new GrassGround(this.map.grid, this.mousePos);
+    this.selectedGround.isCulled = false;
+
+    this.isBuilding = false;
+    
+    this.isInitialized = true;
+  }
+
+  initUI () {
+    super.initUI();
+    
+    this.modeText = new UIText("MINE MODE", new Vector(100, 110), "green", 20);
+
+    this.saveBtn = new UIButton("Save", new Vector(this.sceneManager.game.options.width - 200, 20), new Vector(80, 30), "#fff", 20);
+    this.saveBtn.borderColor = "#0f0";
+    this.saveBtn.setEventListener("mouseover", () => {
+      this.saveBtn.background.color = "#0f0";
+    });
+    this.saveBtn.setEventListener("click", () => {
+      this.saveGame();
+    });
+    this.saveBtn.setEventListener("mouseout", () => {
+      this.saveBtn.background.color = null;
+    });
+    
+    this.uiHandler.register(this.saveBtn);
+  }
+
+  resize (width, height) {
+    super.resize(width, height);
+    this.currentCamera.follow(this.player, new Vector(this.sceneManager.game.options.width / 2, 300));
+  }
+
+  onKeyDown (e) {
+    super.onKeyDown(e);
+    switch(e.keyCode){
+      case KEY_B:
+        this.modeText.text = "BUILD MODE";
+        break;
+    }
+  }
+
+  onKeyUp (e) {
+    super.onKeyUp(e);
+    switch(e.keyCode){
+      case KEY_W:
+      case KEY_UP:
+      case KEY_S:
+      case KEY_DOWN:
+      case KEY_A:
+      case KEY_LEFT:
+      case KEY_D:
+      case KEY_RIGHT:
+        this.currentCamera.isMoving = false;
+        break;
+    }
+  }
+
+  render (ctx) {
+    super.render(ctx);
+    
+    ctx.beginPath();
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.fillRect(0, 0, this.sceneManager.game.options.width, 40);
+    ctx.closePath();
+  }
+
+  update (deltaTime) {
+    super.update(deltaTime);
+    
+    if(KEYBOARD.isKeyPressed(KEY_A) || KEYBOARD.isKeyPressed(KEY_LEFT)){
+      this.currentCamera.moveLeft();
+    }else if(KEYBOARD.isKeyPressed(KEY_D) || KEYBOARD.isKeyPressed(KEY_RIGHT)){
+      this.currentCamera.moveRight();
+    }else{
+      this.currentCamera.isMoving = false;
+    }
+
+    if(KEYBOARD.isKeyPressed(KEY_W) || KEYBOARD.isKeyPressed(KEY_UP)){
+      this.currentCamera.moveUp();
+    }else if(KEYBOARD.isKeyPressed(KEY_S) || KEYBOARD.isKeyPressed(KEY_DOWN)){
+      this.currentCamera.moveDown();
+    }
+
+    this.map.update(deltaTime, this.currentCamera);
+    this.map.grid.onMouseOver(this.mousePos);
+
+  }
+
+  saveGame () {
+    let mapName = prompt("Enter the map name: ");
+    if(mapName){
+      window.localStorage.setItem("minecraft-map__"+mapName, JSON.stringify({
+        size: this.map.size,
+        grid: this.map.grid.asArray(),
+        heights: this.map.heights,
+        spawnPos: this.map.spawnPos
+      }));
+    }
   }
 
 }
+
 
 class GameEndScene extends Scene{
 

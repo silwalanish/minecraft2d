@@ -2,11 +2,11 @@
 
 class Grid {
 
-	constructor (pos, dims, gridDims) {
+	constructor (map, pos, dims, gridDims) {
 		this.pos = pos;
 		this.dims = dims;
 		this.gridDims = gridDims;
-		this.heights = [];
+		this.map = map;
 
 		this.viewingDims = {
 			start: new Vector(),
@@ -39,32 +39,37 @@ class Grid {
 		this.viewingDims.end.x = Math.min(this.dims.x, this.viewingDims.end.x + 1);
 		this.viewingDims.end.y = Math.min(this.dims.y, this.viewingDims.end.y + 1);
 
-		playerPos = this.toGridPos(playerPos.rounded());
-
+		if(playerPos){
+			playerPos = this.toGridPos(playerPos.rounded());
+		}
+		
 		for (let i = this.viewingDims.start.y; i < this.viewingDims.end.y; i++) {
 			for(let j = this.viewingDims.start.x; j < this.viewingDims.end.x; j++) {
 				let cell = this.cells[i][j];
 				if(cell != 0){
-					cell.isCollidingWithPlayer = false;
 					cell.isMouseOver = false;
 					cell.update(deltaTime);
-					let dist = Math.round(Vector.distance(playerPos, cell.gridPos));
-					if(dist < 2){
-						cell.canMineCell = true;
-						cell.isNearPlayer = true;
-					}else if(dist <= 3){
-						cell.isNearPlayer = true;
-						cell.canMineCell = false;
-					}else{
-						cell.isNearPlayer = false;
-						cell.canMineCell = false;
+
+					if(playerPos){
+						let dist = Math.round(Vector.distance(playerPos, cell.gridPos));
+						if(dist < 2){
+							cell.canMineCell = true;
+							cell.isNearPlayer = true;
+						}else if(dist <= 3){
+							cell.isNearPlayer = true;
+							cell.canMineCell = false;
+						}else{
+							cell.isNearPlayer = false;
+							cell.canMineCell = false;
+						}
+
+						if(cell.gridPos.y <= this.map.heights[cell.gridPos.x] + 1){
+							cell.isCulled = false;
+						}else{
+							cell.isCulled = true;
+						}
 					}
 
-					if(cell.gridPos.y <= this.heights[cell.gridPos.x] + 1){
-						cell.isCulled = false;
-					}else{
-						cell.isCulled = true;
-					}
 				}
 			}
 		}
@@ -144,6 +149,30 @@ class Grid {
 
 	toGridPos (worldPos) {
 		return new Vector(Math.floor(worldPos.x / this.gridDims.x), Math.floor(worldPos.y / this.gridDims.y));
+	}
+
+	asArray () {
+		let grid = [];
+		for (let i = 0; i < this.dims.y; i++) {
+			grid[i] = [];
+			for(let j = 0; j < this.dims.x; j++) {
+				let value = 0;
+				let cell = this.cells[i][j];
+				if(cell instanceof GrassGround) {
+					value = 1;
+				}else if(cell instanceof DirtGround) {
+					value = 2;
+				}else if(cell instanceof StoneGround) {
+					value = 3;
+				}else if(cell instanceof Trunk) {
+					value = 4;
+				}else if(cell instanceof Leaves) {
+					value = 5;
+				}
+				grid[i].push(value);
+			}
+		}
+		return grid;
 	}
 
 }

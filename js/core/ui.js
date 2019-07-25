@@ -8,6 +8,7 @@ class UIHandler{
 
   resolveEvent (eventType, e) {
     this.uiElements.forEach(element => {
+      
       if(element.contains(new Vector(e.clientX, e.clientY))){
         switch (eventType){
           case 'click':
@@ -35,6 +36,9 @@ class UIHandler{
   }
 
   register (element) {
+    if(!element || !(element instanceof UIElement)) {
+      return;
+    }
     this.uiElements.push(element);
   }
 

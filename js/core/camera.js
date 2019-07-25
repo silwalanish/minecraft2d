@@ -6,10 +6,32 @@ class Camera{
 		this.pos = pos;
 		this.viewport = viewport;
 		this.world = world;
+		this.vel = new Vector(0, 0);
 
+		this.isMoving = false;
 		this.following = null;
 		this.offset = new Vector();
 	}
+
+	moveLeft () {
+    this.vel.x = -100;
+    this.isMoving = true;
+  }
+
+  moveRight () {
+    this.vel.x = 100;
+    this.isMoving = true;
+	}
+	
+	moveUp () {
+    this.vel.y = -100;
+    this.isMoving = true;
+  }
+
+  moveDown () {
+    this.vel.y = 100;
+    this.isMoving = true;
+  }
 
 	update (deltaTime) {
 		if(this.following){
@@ -24,21 +46,34 @@ class Camera{
 			}else if(this.following.pos.y - this.offset.y < this.pos.y){
 				this.pos.y = this.following.pos.y - this.offset.y;
 			}
-			
-			
-			if(this.pos.x < 0){
-				this.pos.x = 0;
-			}else if(this.pos.x > (this.world.x - this.viewport.x)){
-				this.pos.x = this.world.x - this.viewport.x;
-			}
 
-			if(this.pos.y < 0){
-				this.pos.y = 0;
-			}else if(this.pos.y > (this.world.y - this.viewport.y)){
-				this.pos.y = this.world.y - this.viewport.y;
-			}
+			this.collideWithWorldBounds();
+		}else if(this.isMoving){
+			this.pos.x += this.vel.x * deltaTime;
+			this.pos.y += this.vel.y * deltaTime;
+
+			this.collideWithWorldBounds();
+		}else{
+			this.vel.x = 0;
+			this.vel.y = 0;
 		}
+
+		
 	}
+
+	collideWithWorldBounds () {
+    if(this.pos.x < 0){
+			this.pos.x = 0;
+		}else if(this.pos.x > (this.world.x - this.viewport.x)){
+			this.pos.x = this.world.x - this.viewport.x;
+		}
+
+		if(this.pos.y < 0){
+			this.pos.y = 0;
+		}else if(this.pos.y > (this.world.y - this.viewport.y)){
+			this.pos.y = this.world.y - this.viewport.y;
+		}
+  }
 
 	begin (ctx) {
 		ctx.save();
