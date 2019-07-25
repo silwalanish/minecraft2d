@@ -8,20 +8,8 @@ class MainMenuScene extends Scene{
 
   init () {
     super.init();
-    GetAssetsLoader().loadImage("./images/Minecraft/Stone.png", (img) => {
-      this.background = new Sprite(img, 0, 0);
-      this.background.createPattern("repeat");
-      return img;
-    });
-    GetAssetsLoader().loadImage("./images/gold_block.png", (img) => {
-      return new Sprite(img, 0, 0, img.width, img.height);
-    });
-    GetAssetsLoader().loadImage("./images/birch_planks.png", (img) => {
-      return new Sprite(img, 0, 0, img.width, img.height);
-    });
-    GetAssetsLoader().loadImage("./images/cobblestone.png", (img) => {
-      return new Sprite(img, 0, 0, img.width, img.height);
-    });
+    this.background = GetAssetsLoader().loadImage("./images/Minecraft/Stone.png");
+    this.background.createPattern("repeat");
   }
 
   initUI () {
@@ -113,12 +101,9 @@ class ChooseMapScene extends Scene{
 
   init () {
     super.init();
-    GetAssetsLoader().loadImage("./images/Minecraft/Stone.png", (img) => {
-      this.background = new Sprite(img, 0, 0);
-      this.background.createPattern("repeat");
-      return img;
-    });
 
+    this.background = GetAssetsLoader().loadImage("./images/Minecraft/Stone.png");
+    this.background.createPattern("repeat");
     this.mapType = null;
     this.customMap = null;
   }
@@ -328,6 +313,7 @@ class NormalGameScene extends Scene{
 
     this.mousePos = new Vector(0, 0);
     this.selectedGround = new GrassGround(this.map.grid, this.mousePos);
+    this.selectedGround.isCulled = false;
 
     this.isBuilding = false;
     
@@ -339,62 +325,99 @@ class NormalGameScene extends Scene{
     this.goldCounts = new UIText("0", new Vector(45, 17), "gold", 20);
     this.woodCounts = new UIText("0", new Vector(200, 17), "brown", 20);
     this.stoneCounts = new UIText("0", new Vector(355, 17), "gray", 20);
-    this.goldCounts.textAlign = this.woodCounts.textAlign = this.stoneCounts.textAlign = "left";
+    this.foodCounts = new UIText("0", new Vector(510, 17), "red", 20);
+    this.healthUI = new UIText("0", new Vector(170, 56), "red", 20);
+    this.hungerUI = new UIText("0", new Vector(170, 86), "blue", 20);
+    this.modeText = new UIText("MINE MODE", new Vector(100, 110), "green", 20);
+    this.goldCounts.textAlign = "left";
+    this.woodCounts.textAlign = "left";
+    this.healthUI.textAlign = "left";
+    this.hungerUI.textAlign ="left";
+    this.stoneCounts.textAlign = "left";
+    this.foodCounts.textAlign = "left";
+
+    this.quitBtn = new UIButton("Quit", new Vector(this.sceneManager.game.options.width - 80, 20), new Vector(80, 30), "#fff", 20);
+    this.quitBtn.borderColor = "#f00";
+    this.quitBtn.setEventListener("mouseover", () => {
+      this.quitBtn.background.color = "#f00";
+    });
+    this.quitBtn.setEventListener("click", () => {
+      this.endGame();
+    });
+    this.quitBtn.setEventListener("mouseout", () => {
+      this.quitBtn.background.color = null;
+    });
+
+    this.helpText = new UIText("USE W/A/S/D or Arrow Keys to move. Press B to toggle Build/Mine mode.", new Vector(this.sceneManager.game.options.width / 2, this.sceneManager.game.options.height - 20), "#000", 20);
+
+    this.uiHandler.register(this.helpText)
+    this.uiHandler.register(this.quitBtn);
     this.uiHandler.register(this.goldCounts);
     this.uiHandler.register(this.woodCounts);
     this.uiHandler.register(this.stoneCounts);
+    this.uiHandler.register(this.foodCounts);
+    this.uiHandler.register(this.healthUI);
+    this.uiHandler.register(this.hungerUI);
+    this.uiHandler.register(this.modeText);
   }
 
   onClick (e) {
+    super.onClick(e);
     let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY));
     this.mousePos = this.map.grid.toGridPos(pos);
     
-    if(this.isBuilding){
+    if(this.player.isBuilding && this.map.grid.isEmpty(this.mousePos)){
       this.map.grid.addObj(new GrassGround(this.map.grid, this.mousePos));
     }
   }
 
   onMouseDown (e) {
-    this.player.mine();
+    super.onMouseDown(e);
+    let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY)); 
+    this.mousePos = this.map.grid.toGridPos(pos);
+    let playerGridPos = this.map.grid.toGridPos(this.player.pos.rounded());
+    if(Vector.distance(this.mousePos, playerGridPos) <= 2){
+      if(playerGridPos.x > this.mousePos.x){
+        this.player.direction = -1;
+      }else if(playerGridPos.x < this.mousePos.x) {
+        this.player.direction = 1;
+      }
+      this.player.mine();
+    }
   }
 
   onMouseUp (e) {
+    super.onMouseUp(e);
+    let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY)); 
+    this.mousePos = this.map.grid.toGridPos(pos);
     this.player.stopMinning();
   }
   
   onMouseMove (e) {
+    super.onMouseMove(e);
     let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY)); 
     this.mousePos = this.map.grid.toGridPos(pos);
     this.map.grid.onMouseOver(this.mousePos);
     
-    if(this.isBuilding){
+    if(this.player.isBuilding && this.map.grid.isEmpty(this.mousePos)){
+      console.log(this.map.grid.isEmpty(this.mousePos));
+      
       this.selectedGround.gridPos = this.mousePos;
     }
   }
 
   onKeyDown (e) {
-    if(e.keyCode == 37){
-      this.player.moveLeft();
-    }else if(e.keyCode == 39){
-      this.player.moveRight();
+    super.onKeyDown(e);
+    if(e.keyCode == KEY_B){
+      this.player.toggleBuilding();
+      if(this.player.isBuilding){
+        this.modeText.text = "BUILD MODE";
+      }else{
+        this.modeText.text = "MINE MODE";
+      }
     }
-
-    if(e.keyCode == 38 && this.player.isOnGround){
-      this.player.jump();
-    }
-
-    if(e.keyCode == 66){
-      this.isBuilding = !this.isBuilding;
-      console.log("Build Mode: "+ this.isBuilding);
-      
-    }
-  }
-
-  onKeyUp (e) {
-    if(e.keyCode == 37){
-      this.player.isWalking = false;
-    }else if(e.keyCode == 39){
-      this.player.isWalking = false;
+    if(e.keyCode == KEY_E){
+      this.player.eatFood();
     }
   }
 
@@ -409,7 +432,7 @@ class NormalGameScene extends Scene{
     this.currentCamera.begin(ctx);
     this.map.render(ctx);
 
-    if(this.isBuilding){
+    if(this.player.isBuilding){
       ctx.globalAlpha = 0.5;
       this.selectedGround.draw(ctx);
       ctx.globalAlpha = 1;
@@ -424,9 +447,26 @@ class NormalGameScene extends Scene{
     GetAssetsLoader().assets["./images/gold_block.png"].draw(ctx, new Vector(10, 10), new Vector(20, 20));
     GetAssetsLoader().assets["./images/birch_planks.png"].draw(ctx, new Vector(165, 10), new Vector(20, 20));
     GetAssetsLoader().assets["./images/cobblestone.png"].draw(ctx, new Vector(320, 10), new Vector(20, 20));
+    GetAssetsLoader().assets["./images/apple.png"].draw(ctx, new Vector(475, 10), new Vector(20, 20));
 
     ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
     ctx.fillRect(0, this.sceneManager.game.options.height - 40, this.sceneManager.game.options.width, 40);
+    ctx.closePath();
+
+    ctx.beginPath();
+    GetAssetsLoader().assets["./images/health.png"].draw(ctx, new Vector(20, 50), new Vector(20, 20));
+    ctx.fillStyle = "#f00";
+    ctx.fillRect(50, 50, Math.round(this.player.health), 20);
+    ctx.strokeStyle = "#f00";
+    ctx.strokeRect(50, 50, 100, 20);
+    ctx.closePath();
+
+    ctx.beginPath();
+    GetAssetsLoader().assets["./images/apple.png"].draw(ctx, new Vector(20, 80), new Vector(20, 20));
+    ctx.fillStyle = "#00f";
+    ctx.fillRect(50, 80, Math.round(this.player.hunger), 20);
+    ctx.strokeStyle = "#00f";
+    ctx.strokeRect(50, 80, 100, 20);
     ctx.closePath();
   }
 
@@ -439,7 +479,7 @@ class NormalGameScene extends Scene{
       console.log(this.frames / 10);
       this.frames = 0;
     }
-    if(this.isBuilding){
+    if(this.player.isBuilding){
       this.selectedGround.update(deltaTime);
     }
 
@@ -457,7 +497,7 @@ class NormalGameScene extends Scene{
       }
     }
 
-    this.map.update(deltaTime, this.currentCamera, this.player.getCenterPos());
+    this.map.update(deltaTime, this.currentCamera, this.player);
     this.player.update(deltaTime);
     this.map.grid.onMouseOver(this.mousePos);
 
@@ -467,6 +507,13 @@ class NormalGameScene extends Scene{
     this.goldCounts.text = this.player.getGoldRewards().toString();
     this.stoneCounts.text = this.player.getStoneRewards().toString();
     this.woodCounts.text = this.player.getWoodRewards().toString();
+    this.foodCounts.text = this.player.getFoodRewards().toString();
+    this.healthUI.text = Math.round(this.player.health).toString();
+    this.hungerUI.text = Math.round(this.player.hunger).toString();
+
+    if(this.player.health <= 0){
+      this.endGame();
+    }
   }
 
   endGame () {
@@ -484,10 +531,61 @@ class GameEndScene extends Scene{
 
   init () {
     super.init();
+    
+    this.background = GetAssetsLoader().loadImage("./images/Minecraft/Stone.png");
+    this.background.createPattern("repeat");
+  }
+
+  initUI () {
+    super.initUI();
+    let gameOverText = new UIText("GAME OVER", new Vector(this.sceneManager.game.options.width / 2, 100), "#f00", 100);
+    gameOverText.fontWeight = "900";
+
+    let exitToMenuBtn = new UIButton("Exit", new Vector(this.sceneManager.game.options.width / 2 + 80, this.sceneManager.game.options.height - 100), 
+    new Vector(120, 50), "#fff", 20);
+
+    exitToMenuBtn.background.image = GetAssetsLoader().loadImage("./images/clay.png");
+    exitToMenuBtn.borderColor = "#000";
+    exitToMenuBtn.borderSize = 2;
+
+    exitToMenuBtn.setEventListener('mouseover', function() {
+      this.background.color = "rgba(255, 0, 0, 0.5)";
+    });
+
+    exitToMenuBtn.setEventListener('mouseout', function() {
+      this.background.color = null;
+    });
+
+    exitToMenuBtn.setEventListener('click', () =>{
+      this.exitToMainMenu();
+    });
+
+    let playAgainBtn = new UIButton("Play Again", new Vector(this.sceneManager.game.options.width / 2 - 80, this.sceneManager.game.options.height - 100), 
+              new Vector(120, 50), "#fff", 20);
+    playAgainBtn.background.image = GetAssetsLoader().loadImage("./images/clay.png");
+    playAgainBtn.borderColor = "#000";
+    playAgainBtn.borderSize = 2;
+
+
+    playAgainBtn.setEventListener('mouseover', function() {
+      this.background.color = "rgba(0, 255, 0, 0.5)";
+    });
+
+    playAgainBtn.setEventListener('mouseout', function() {
+      this.background.color = null;
+    });
+
+    playAgainBtn.setEventListener('click', () =>{
+      this.playAgain();
+    });
+
+    this.uiHandler.register(gameOverText);
+    this.uiHandler.register(exitToMenuBtn);
+    this.uiHandler.register(playAgainBtn);
   }
 
   playAgain () {
-    this.sceneManager.switchToScene(new this.gameSceneClass(this.sceneManager));
+    this.sceneManager.switchToScene(new ChooseMapScene(this.sceneManager, this.gameSceneClass));
   }
 
   exitToMainMenu () {

@@ -115,8 +115,8 @@ class Grid {
 		return cell && cell instanceof Trunk;
 	}
 
-	canAddTreeAt (gridPos) {
-		
+	isEmpty (gridPos) {
+		return this.cells[gridPos.y][gridPos.x] == 0;
 	}
 
 	cellIsNearPlayer (gridPos) {

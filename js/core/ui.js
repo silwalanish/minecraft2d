@@ -143,6 +143,12 @@ class UIElement{
     ctx.save();
     ctx.translate(this.pos.x, this.pos.y);
     ctx.rect(-this.dims.x / 2, -this.dims.y / 2, this.dims.x, this.dims.y);
+    
+    if(this.borderColor){
+      ctx.strokeStyle = this.borderColor;
+      ctx.lineWidth = this.borderSize;
+      ctx.stroke();
+    }
     if(this.background){
       if(this.background.image){
         ctx.fillStyle = ctx.createPattern(this.background.image, "repeat");
@@ -152,11 +158,6 @@ class UIElement{
         ctx.fillStyle = this.background.color;
         ctx.fill();
       }
-    }
-    if(this.borderColor){
-      ctx.strokeStyle = this.borderColor;
-      ctx.lineWidth = this.borderSize;
-      ctx.stroke();
     }
     ctx.restore();
     ctx.closePath();

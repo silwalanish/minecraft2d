@@ -115,4 +115,16 @@ class Collider{
     }
   }
 
+  collidesWith (collider) {
+    return (this.contains(collider.parent.pos) || 
+      this.contains(Vector.add(collider.parent.pos, collider.parent.dims)) ||
+      this.contains(Vector.add(collider.parent.pos, new Vector(collider.parent.dims.x, 0))) ||
+      this.contains(Vector.add(collider.parent.pos, new Vector(0, collider.parent.dims.y))));
+  }
+
+  contains (pos) {
+    return (pos.x >= this.parent.pos.x && pos.x <= this.parent.pos.x + this.parent.dims.x) && 
+           (pos.y >= this.parent.pos.y && pos.y <= this.parent.pos.y + this.parent.dims.y);
+  }
+
 }

@@ -5,15 +5,23 @@ class GameMap{
   constructor (size) {
     this.size = size;
     this.grid = new Grid(new Vector(0, 0), this.size, new Vector(GRID_SIZE, GRID_SIZE));
+    this.foods = [];
     this.heightMap = null;
     this.numTree = 0;
     this.timer = 0;
   }
 
-  update (deltaTime, camera, playerPos) {
-    this.grid.update(deltaTime, camera, playerPos);
+  update (deltaTime, camera, player) {
+    this.grid.update(deltaTime, camera, player.getCenterPos());
+    for(let i = 0; i < this.foods.length; i++){
+      this.foods[i].update(deltaTime, this.grid, player);
+      if(this.foods[i].isCollected){
+        this.foods.splice(i, 1);
+        i--;
+      }
+    }
     this.timer += deltaTime;
-    if(this.timer > 2){
+    if(this.timer >= 15){
       let x = Math.round(Math.random() * this.size.x);
       let tries = 0;
       while (tries < 10 && this.numTree < 20){
@@ -23,16 +31,21 @@ class GameMap{
         x = Math.round(Math.random() * this.size.x);
         tries++;
       }
+      this.addFood();
       this.timer = 0;
     }
   }
 
   render (ctx) {
     this.grid.render(ctx);
+    this.foods.forEach(food => {
+      food.draw(ctx);
+    });
   }
 
   addTree (i, j) {
     if(!this.grid.hasTreeAt(new Vector(i - 1, this.grid.dims.y - Math.round(this.heightMap.height(i - 1)) - 1)) && 
+      !this.grid.hasTreeAt(new Vector(i + 1, this.grid.dims.y - Math.round(this.heightMap.height(i + 1)) - 1)) &&
       this.grid.cellAt(new Vector(i, j)) instanceof GrassGround)
     {
       this.grid.addObj(new Trunk(this.grid, new Vector(i, j-1)));
@@ -51,6 +64,15 @@ class GameMap{
       return true;
     }
     return false;
+  }
+
+  addFood () {
+    if(this.foods.length < 10){
+      let x = Math.round(Math.random() * this.size.x);
+      let y = Math.round(this.heightMap.height(x));
+      y = this.size.y - y;
+      this.foods.push(new Food(this.grid.toWorldPos(new Vector(x, y - 1))));
+    }
   }
 
   generate () {

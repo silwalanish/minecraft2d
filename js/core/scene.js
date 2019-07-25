@@ -27,8 +27,9 @@ class Scene {
     this.sceneManager.game.el.onmousemove = this.onMouseMove.bind(this);
     this.sceneManager.game.el.onmouseover = this.onMouseOver.bind(this);
     this.sceneManager.game.el.onmouseout = this.onMouseOut.bind(this);
-    document.onkeydown = this.onKeyDown.bind(this);
-    document.onkeyup = this.onKeyUp.bind(this);
+
+    document.addEventListener("keydown", this.onKeyDown.bind(this));
+
     this.isInitialized = true;
 
     this.initUI();
@@ -69,10 +70,6 @@ class Scene {
   }
 
   onKeyDown (e) {
-    // Implemented in child class
-  }
-
-  onKeyUp (e) {
     // Implemented in child class
   }
 

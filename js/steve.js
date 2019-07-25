@@ -20,30 +20,46 @@ class Steve{
     this.vel = this.options.vel;
     this.gravity = this.options.gravity;
 
-    this.sprite = this.options.sprite;
-
-    this.spriteSheet = new Sprite(this.sprite, 0, 0, 64, 64);
+    this.spriteSheet = new Sprite(this.options.sprite, 0, 0, 64, 64);
     this.walkingAnim = new SpriteAnimation(this.spriteSheet, 0, 2, 10);
     this.miningAnim = new SpriteAnimation(this.spriteSheet, 3, 4, 5);
     this.animation = null;
 
     this.isWalking = false;
     this.isMining = false;
+    this.isBuilding = false;
     this.canMine = true;
     this.isOnGround = false;
     this.minningDelay = 0.2;
     this.timer = 0;
     this.direction = 1;
+    this.hunger = 100;
+    this.health = 100;
 
     this.rewards = {
       gold: 0,
       wood: 0,
-      stone: 0
+      stone: 0,
+      food: 3
     };
 
     this.isOnGround = false;
 
     this.collider = new Collider(this);
+  }
+
+  eatFood () {
+    if(this.rewards.food > 0 && this.hunger <= 50){
+      this.rewards.food--;
+      this.hunger += 50;
+    }
+  }
+
+  toggleBuilding () {
+    this.isBuilding = !this.isBuilding;
+    if(this.isBuilding){
+      this.stopMinning();
+    }
   }
 
   jump () {
@@ -68,7 +84,7 @@ class Steve{
   }
 
   mine () {
-    if(this.canMine){
+    if(this.canMine && !this.isBuilding){
       this.isMining = true;
     }
   }
@@ -93,14 +109,31 @@ class Steve{
       }
       this.spriteSheet.draw(ctx, new Vector(-this.dims.x / 2, -this.dims.y / 2), this.dims);
     }
-    ctx.strokeStyle = "#fff";
-    ctx.strokeRect(-this.dims.x / 2, -this.dims.y / 2, this.dims.x, this.dims.y);
     ctx.restore();
     ctx.closePath();
   }
 
   update (deltaTime) {
     this.timer += deltaTime;
+    if(this.hunger > 0){
+      this.hunger -= deltaTime * 0.7;
+    }else{
+      this.hunger = 0;
+      this.health -= deltaTime;
+    }
+
+    if(KEYBOARD.isKeyPressed(KEY_A) || KEYBOARD.isKeyPressed(KEY_LEFT)){
+      this.moveLeft();
+    }else if(KEYBOARD.isKeyPressed(KEY_D) || KEYBOARD.isKeyPressed(KEY_RIGHT)){
+      this.moveRight();
+    }else{
+      this.isWalking = false;
+    }
+
+    if(KEYBOARD.isKeyPressed(KEY_W) || KEYBOARD.isKeyPressed(KEY_UP) && this.isOnGround){
+      this.jump();
+    }
+
     this.oldPos.x = this.pos.x;
     this.oldPos.y = this.pos.y;
 
@@ -160,6 +193,9 @@ class Steve{
       case "Wood":
         this.rewards.wood += rewards.reward;
         break;
+      case "Food":
+        this.rewards.food += rewards.reward;
+        break;
     }
   }
 
@@ -177,6 +213,10 @@ class Steve{
 
   getWoodRewards () {
     return this.rewards.wood;
+  }
+
+  getFoodRewards () {
+    return this.rewards.food;
   }
 
 }
