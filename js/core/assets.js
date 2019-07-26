@@ -22,8 +22,6 @@ function GetAssetsLoader () {
       this.assets[path] = new Image();
       this.assets[path].src = path;
       this.assets[path].onload = (img) => {
-        console.log(path);
-        
         this.numStillLoading--;
       };
 

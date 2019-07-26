@@ -20,6 +20,7 @@ window.onload = () => {
     "./images/anim-sheet.png",
     "./images/zombie_typeA_walk_spritesheet.png"
   ], () => {
+    document.getElementById("game-loading").style.display = "none";
     let game = new Game(document.getElementById("game-container"), {
       fullScreen: true,
       startScene: MainMenuScene,

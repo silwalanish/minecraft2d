@@ -7,3 +7,21 @@
   font-family: "Minecraft";
   src: url("../fonts/Minecraft/1_Minecraft-Regular.otf");
 }
+
+#game-loading{
+  width: 100%;
+  height: 100%;
+  background: #000;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  color: #ffffff;
+}
+
+#game-loading h1{
+  font-family: "Minecraft";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
