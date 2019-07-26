@@ -71,7 +71,7 @@ class RandomGameMap extends GameMap {
       }, 0); 
     }
     this.spawnPos.x = Math.round(this.grid.dims.x * Math.random());
-    this.spawnPos.y = (this.grid.dims.y - Math.round(this.heightMap.height(this.spawnPos.x)) - 10) * this.grid.gridDims.y;
+    this.spawnPos.y = (Math.round(this.heightAt(this.spawnPos.x)) - 4) * this.grid.gridDims.y;
     this.spawnPos.x *= this.grid.gridDims.y;
     return this.spawnPos.copy();
   }

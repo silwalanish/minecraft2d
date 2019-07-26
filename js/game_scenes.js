@@ -839,6 +839,9 @@ class CreativeGameScene extends GameScene{
     
     this.className = CreativeGameScene;
 
+    this.currentCamera.pos = this.spawnPos.copy();
+    this.currentCamera.collideWithWorldBounds();
+
     this.selectedGround = new GrassGround(this.map.grid, this.mousePos);
     this.selectedGroundClass = GrassGround;
     this.selectedGround.isCulled = false;
