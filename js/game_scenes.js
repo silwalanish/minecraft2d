@@ -761,7 +761,7 @@ class NormalGameScene extends GameScene{
       let x = Math.round(Math.random() * this.map.size.x);
       let tries = 0;
       while (tries < 10){
-        if(this.addTree(x, this.map.size.y - Math.round(this.map.heightAt(x)))) {
+        if(this.addTree(x, Math.round(this.map.heightAt(x)))) {
           break;
         }
         x = Math.round(Math.random() * this.map.size.x);
