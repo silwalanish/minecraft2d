@@ -14,6 +14,7 @@ function GetAssetsLoader () {
     }
 
     loadImage (path, reload) {
+      path = path.toLowerCase();
       if(this.assets.hasOwnProperty(path) && !reload){
         return this.assets[path];
       }
