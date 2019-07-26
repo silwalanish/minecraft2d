@@ -313,7 +313,10 @@ class GameScene extends Scene {
     });
     this.quitBtn.setEventListener("click", () => {
       this.uiClicked = true;
-      this.endGame();
+      let ok = confirm("Are you sure you want to exit?");
+      if(ok){
+        this.endGame();
+      }
     });
     this.quitBtn.setEventListener("mouseout", () => {
       this.quitBtn.background.color = null;
@@ -489,10 +492,7 @@ class GameScene extends Scene {
   }
 
   endGame () {
-    let ok = confirm("Are you sure you want to exit?");
-    if(ok){
-      this.sceneManager.switchToScene(new GameEndScene(this.sceneManager, this.className));
-    }
+    this.sceneManager.switchToScene(new GameEndScene(this.sceneManager, this.className));
   }
 
   selectGround (type) {

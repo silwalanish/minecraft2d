@@ -144,7 +144,7 @@ class Steve{
       this.isWalking = false;
     }
 
-    if(KEYBOARD.isKeyPressed(KEY_W) || KEYBOARD.isKeyPressed(KEY_UP) && this.isOnGround){
+    if((KEYBOARD.isKeyPressed(KEY_W) || KEYBOARD.isKeyPressed(KEY_UP)) && this.isOnGround){
       this.jump();
     }
 
