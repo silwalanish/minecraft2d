@@ -325,8 +325,8 @@ class GameScene extends Scene {
     this.errorText = new UIText("", new Vector(this.sceneManager.game.options.width / 2, 150), "#f00", 30);
       this.uiHandler.register(this.errorText);
 
-    this.helpText = new UIText("USE W/A/S/D or Arrow Keys to move. Press B to toggle Build/Mine mode. LEFT CLICK ON OBJECT TO MINE/PLACE OBJECT/KILL ZOMBIES", 
-      new Vector(this.sceneManager.game.options.width / 2, this.sceneManager.game.options.height - 20), "#000", 15);
+    this.helpText = new UIText("USE W/A/S/D or Arrow Keys to move. Press B to toggle Build/Mine mode. LEFT CLICK ON OBJECT TO MINE/PLACE OBJECT/KILL ZOMBIES. Press E to eat food.", 
+      new Vector(this.sceneManager.game.options.width / 2, this.sceneManager.game.options.height - 20), "#00f", 12);
 
     this.grassGroundSelect = new UIButton("1", new Vector(this.sceneManager.game.options.width - 40, 100), new Vector(40, 40), "#fff", 10);
     this.grassGroundSelect.background.image = GetAssetsLoader().loadImage("./images/Minecraft/Grass.png");
