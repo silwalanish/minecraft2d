@@ -314,6 +314,9 @@ class GameScene extends Scene {
     this.currentCamera.world = this.worldSize;
 
     this.mousePos = new Vector(0, 0);
+    this.errorMsgTimer = 0;
+    this.isCreative = false;
+    this.uiClicked = false;
 
     this.foods = [];
 
@@ -329,15 +332,85 @@ class GameScene extends Scene {
       this.quitBtn.background.color = "#f00";
     });
     this.quitBtn.setEventListener("click", () => {
+      this.uiClicked = true;
       this.endGame();
     });
     this.quitBtn.setEventListener("mouseout", () => {
       this.quitBtn.background.color = null;
     });
+    
+    this.errorText = new UIText("", new Vector(this.sceneManager.game.options.width / 2, 150), "#f00", 30);
+      this.uiHandler.register(this.errorText);
 
     this.helpText = new UIText("USE W/A/S/D or Arrow Keys to move. Press B to toggle Build/Mine mode. LEFT CLICK TO MINE/PLACE OBJECT/KILL ZOMBIES", 
       new Vector(this.sceneManager.game.options.width / 2, this.sceneManager.game.options.height - 20), "#000", 15);
- 
+
+    this.grassGroundSelect = new UIButton("1", new Vector(this.sceneManager.game.options.width - 40, 100), new Vector(40, 40), "#fff", 10);
+    this.grassGroundSelect.background.image = GetAssetsLoader().loadImage("./images/Minecraft/Grass.png");
+    this.grassGroundSelect.borderColor = "#000";
+    this.grassGroundSelect.setEventListener("mouseover", () => {
+      this.grassGroundSelect.background.color = "rgba(0, 0, 255, 0.2)";
+    });
+    this.grassGroundSelect.setEventListener("click", () => {
+      this.uiClicked = true;
+      this.selectGround(1);
+    });
+    this.grassGroundSelect.setEventListener("mouseout", () => {
+      this.grassGroundSelect.background.color = null;
+    });
+
+    this.uiHandler.register(this.grassGroundSelect);
+
+    this.dirtGroundSelect = new UIButton("2", new Vector(this.sceneManager.game.options.width - 40, 140), new Vector(40, 40), "#fff", 10);
+    this.dirtGroundSelect.background.image = GetAssetsLoader().loadImage("./images/Minecraft/Dirt.png");
+    this.dirtGroundSelect.borderColor = "#000";
+    this.dirtGroundSelect.setEventListener("mouseover", () => {
+      this.dirtGroundSelect.background.color = "rgba(0, 0, 255, 0.2)";
+    });
+    this.dirtGroundSelect.setEventListener("click", () => {
+      this.uiClicked = true;
+      this.selectGround(2);
+    });
+    this.dirtGroundSelect.setEventListener("mouseout", () => {
+      this.dirtGroundSelect.background.color = null;
+    });
+
+    this.uiHandler.register(this.dirtGroundSelect);
+
+    this.sandGroundSelect = new UIButton("4", new Vector(this.sceneManager.game.options.width - 40, 220), new Vector(40, 40), "#fff", 10);
+    this.sandGroundSelect.background.image = GetAssetsLoader().loadImage("./images/Minecraft/Sand.png");
+    this.sandGroundSelect.borderColor = "#000";
+    this.sandGroundSelect.setEventListener("mouseover", () => {
+      this.sandGroundSelect.background.color = "rgba(0, 0, 255, 0.2)";
+    });
+    this.sandGroundSelect.setEventListener("click", () => {
+      this.uiClicked = true;
+      this.selectGround(4);
+    });
+    this.sandGroundSelect.setEventListener("mouseout", () => {
+      this.sandGroundSelect.background.color = null;
+    });
+
+    this.uiHandler.register(this.sandGroundSelect);
+
+    this.woodGroundSelect = new UIButton("5", new Vector(this.sceneManager.game.options.width - 40, 260), new Vector(40, 40), "#fff", 10);
+    this.woodGroundSelect.background.image = GetAssetsLoader().loadImage("./images/Minecraft/Wood_ground.png");
+    this.woodGroundSelect.borderColor = "#000";
+    this.woodGroundSelect.setEventListener("mouseover", () => {
+      this.woodGroundSelect.background.color = "rgba(0, 0, 255, 0.2)";
+    });
+    this.woodGroundSelect.setEventListener("click", () => {
+      this.uiClicked = true;
+      this.selectGround(5);
+    });
+    this.woodGroundSelect.setEventListener("mouseout", () => {
+      this.woodGroundSelect.background.color = null;
+    });
+
+    this.uiHandler.register(this.woodGroundSelect);
+    
+    this.selectedGroundText = new UIText("GRASSGROUND", new Vector(100, 130), "red", 20);
+    this.uiHandler.register(this.selectedGroundText);
     this.uiHandler.register(this.helpText);
     this.uiHandler.register(this.quitBtn);
   }
@@ -356,6 +429,7 @@ class GameScene extends Scene {
 
   onMouseUp (e) {
     super.onMouseUp(e);
+    this.uiClicked = false;
     let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY)); 
     this.mousePos = this.map.grid.toGridPos(pos);
   }
@@ -391,8 +465,18 @@ class GameScene extends Scene {
   update (deltaTime) {
     super.update(deltaTime);
     this.timer += deltaTime;
+    if(this.errorMsgTimer > 0){
+      this.errorMsgTimer -= deltaTime;
+    }else if(this.errorMsgTimer <= 0){
+      this.errorMsgTimer = 0;
+      this.errorText.text = "";
+    }
   }
 
+  setError (msg) {
+    this.errorMsgTimer = 3;
+    this.errorText.text = msg;
+  }
   
   addFood () {
     if(this.foods.length < 10){
@@ -428,7 +512,53 @@ class GameScene extends Scene {
     this.sceneManager.switchToScene(new GameEndScene(this.sceneManager, this.className));
   }
 
+  
+
+  selectGround (type) {
+    switch (type) {
+      case 1:
+        this.selectedGroundClass = GrassGround;
+        break;
+      case 2:
+        this.selectedGroundClass = DirtGround;
+        break;
+      case 3:
+        if(this.isCreative){
+          this.selectedGroundClass = StoneGround;
+        }
+        break;
+      case 4:
+        this.selectedGroundClass = SandGround;
+        break;
+      case 5:
+        this.selectedGroundClass = WoodGround;
+        break;
+      case 6:
+        if(this.isCreative){
+          this.selectedGroundClass = GoldGround;
+        }
+        break;
+      case 7:
+        if(this.isCreative){
+          this.selectedGroundClass = Trunk;
+        }
+        break;
+      case 8:
+        if(this.isCreative){
+          this.selectedGroundClass = Leaves;
+        }
+        break;
+      default:
+        this.selectedGroundClass = GrassGround;
+    }
+
+    this.selectedGround = new this.selectedGroundClass(this.map.grid, this.mousePos);
+    this.selectedGroundText.text = this.selectedGround.constructor.name.toUpperCase();
+
+  }
 }
+
+const ZOMBIES_SPAWN_DELAY = 15;
 
 class NormalGameScene extends GameScene{
 
@@ -442,13 +572,14 @@ class NormalGameScene extends GameScene{
     this.currentCamera.follow(this.player, new Vector(this.sceneManager.game.options.width / 2, 300));
 
     this.selectedGround = new GrassGround(this.map.grid, this.mousePos);
+    this.selectedGroundClass = GrassGround;
     this.selectedGround.isCulled = false;
 
-    this.goldUIImg = new Sprite(GetAssetsLoader().assets["./images/gold_block.png"], 0, 0, 20, 20);
-    this.woodUIImg = new Sprite(GetAssetsLoader().assets["./images/birch_planks.png"], 0, 0, 20, 20);
-    this.stoneUIImg = new Sprite(GetAssetsLoader().assets["./images/cobblestone.png"], 0, 0, 20, 20);
-    this.foodUIImg = new Sprite(GetAssetsLoader().assets["./images/apple.png"], 0, 0, 20, 20);
-    this.healthUIImg = new Sprite(GetAssetsLoader().assets["./images/health.png"], 0, 0, 20, 20);
+    this.goldUIImg = new Sprite(GetAssetsLoader().assets["./images/gold_block.png"], 0, 0);
+    this.woodUIImg = new Sprite(GetAssetsLoader().assets["./images/birch_planks.png"], 0, 0);
+    this.stoneUIImg = new Sprite(GetAssetsLoader().assets["./images/cobblestone.png"], 0, 0);
+    this.foodUIImg = new Sprite(GetAssetsLoader().assets["./images/apple.png"], 0, 0);
+    this.healthUIImg = new Sprite(GetAssetsLoader().assets["./images/health.png"], 0, 0);
 
     this.zombies = [];
 
@@ -484,8 +615,29 @@ class NormalGameScene extends GameScene{
 
   onClick (e) {
     super.onClick(e);
-    if(this.player.isBuilding && this.map.grid.isEmpty(this.mousePos)){
-      this.map.grid.addObj(new GrassGround(this.map.grid, this.mousePos));
+    if(this.player.isBuilding && !this.uiClicked){
+      if(!this.map.grid.isEmpty(this.mousePos)){
+        this.setError("Remove the ground before you place.");
+        return;
+      }
+      if(this.selectedGround instanceof WoodGround && this.player.getWoodRewards() < 10){
+        this.setError("Insufficent Wood, 10 required.");
+        return;
+      }else if(this.selectedGround instanceof WoodGround){
+        this.player.rewards.wood -= 10;
+      }else if(this.selectedGround instanceof SandGround && this.player.getGoldRewards() < 10){
+        this.setError("Insufficent Gold, 10 required.");
+        return;
+      }else if(this.selectedGround instanceof SandGround){
+        this.player.rewards.gold -= 10;
+      }else if(this.player.getStoneRewards() < 10){
+        this.setError("Insufficent Stone, 10 required.");
+        return;
+      }else{
+        this.player.rewards.stone -= 10;
+      }
+
+      this.map.grid.addObj(new this.selectedGroundClass(this.map.grid, this.mousePos));
     }
   }
 
@@ -523,6 +675,32 @@ class NormalGameScene extends GameScene{
         this.modeText.text = "BUILD MODE";
       }else{
         this.modeText.text = "MINE MODE";
+      }
+      switch(e.keyCode){
+        case KEY_1:
+          this.selectGround(1);
+          break;
+        case KEY_2:
+          this.selectGround(2);
+          break;
+        case KEY_3:
+          this.selectGround(3);
+          break;
+        case KEY_4:
+          this.selectGround(4);
+          break;
+        case KEY_5:
+          this.selectGround(5);
+          break;
+        case KEY_6:
+          this.selectGround(6);
+          break;
+        case KEY_7:
+          this.selectGround(7);
+          break;
+        case KEY_8:
+          this.selectGround(8);
+          break;
       }
     }
     if(e.keyCode == KEY_E){
@@ -597,7 +775,7 @@ class NormalGameScene extends GameScene{
   update (deltaTime) {
     super.update(deltaTime);
 
-    if(this.timer > 1){
+    if(this.timer > ZOMBIES_SPAWN_DELAY){
       let x = Math.round(Math.random() * this.map.size.x);
       let tries = 0;
       while (tries < 10){
@@ -684,14 +862,12 @@ class CreativeGameScene extends GameScene{
     this.selectedGround.isCulled = false;
 
     this.isBuilding = false;
-    
+    this.isCreative = true;
     this.isInitialized = true;
   }
 
   initUI () {
     super.initUI();
-
-    this.selectedGroundText = new UIText("GRASSGROUND", new Vector(100, 80), "red", 20);
 
     this.modeText = new UIText("MINE MODE", new Vector(100, 110), "green", 20);
 
@@ -707,50 +883,77 @@ class CreativeGameScene extends GameScene{
       this.saveBtn.background.color = null;
     });
     
-    this.uiHandler.register(this.saveBtn);
-    this.uiHandler.register(this.selectedGroundText);
-    this.uiHandler.register(this.modeText);
-  }
+    this.stoneGroundSelect = new UIButton("3", new Vector(this.sceneManager.game.options.width - 40, 180), new Vector(40, 40), "#fff", 10);
+    this.stoneGroundSelect.background.image = GetAssetsLoader().loadImage("./images/Minecraft/Stone.png");
+    this.stoneGroundSelect.borderColor = "#000";
+    this.stoneGroundSelect.setEventListener("mouseover", () => {
+      this.stoneGroundSelect.background.color = "rgba(0, 0, 255, 0.2)";
+    });
+    this.stoneGroundSelect.setEventListener("click", () => {
+      this.uiClicked = true;
+      this.selectGround(3);
+    });
+    this.stoneGroundSelect.setEventListener("mouseout", () => {
+      this.stoneGroundSelect.background.color = null;
+    });
 
-  selectGround (type) {
-    if(this.isBuilding){
-      switch (type) {
-        case 1:
-          this.selectedGroundClass = GrassGround;
-          break;
-        case 2:
-          this.selectedGroundClass = DirtGround;
-          break;
-        case 3:
-          this.selectedGroundClass = StoneGround;
-          break;
-        case 4:
-          this.selectedGroundClass = SandGround;
-          break;
-        case 5:
-          this.selectedGroundClass = WoodGround;
-          break;
-        case 6:
-          this.selectedGroundClass = GoldGround;
-          break;
-        case 7:
-          this.selectedGroundClass = Trunk;
-          break;
-        case 8:
-          this.selectedGroundClass = Leaves;
-          break;
-        default:
-          this.selectedGroundClass = GrassGround;
-      }
-      
-      this.selectedGround = new this.selectedGroundClass(this.map.grid, this.mousePos);
-      this.selectedGroundText.text = this.selectedGround.constructor.name.toUpperCase();
-    }
+    this.uiHandler.register(this.stoneGroundSelect);
+    
+    this.goldGroundSelect = new UIButton("6", new Vector(this.sceneManager.game.options.width - 40, 300), new Vector(40, 40), "#fff", 10);
+    this.goldGroundSelect.background.image = GetAssetsLoader().loadImage("./images/Minecraft/Gold.png");
+    this.goldGroundSelect.borderColor = "rgba(0, 0, 255, 0.2)";
+    this.goldGroundSelect.setEventListener("mouseover", () => {
+      this.goldGroundSelect.background.color = "rgba(0, 0, 255, 0.2)";
+    });
+    this.goldGroundSelect.setEventListener("click", () => {
+      this.uiClicked = true;
+      this.selectGround(6);
+    });
+    this.goldGroundSelect.setEventListener("mouseout", () => {
+      this.woodGroundSelect.background.color = null;
+    });
+
+    this.uiHandler.register(this.goldGroundSelect);
+    
+    this.trunkGroundSelect = new UIButton("5", new Vector(this.sceneManager.game.options.width - 40, 340), new Vector(40, 40), "#fff", 10);
+    this.trunkGroundSelect.background.image = GetAssetsLoader().loadImage("./images/Minecraft/Wood_trunk.png");
+    this.trunkGroundSelect.borderColor = "#000";
+    this.trunkGroundSelect.setEventListener("mouseover", () => {
+      this.trunkGroundSelect.background.color = "rgba(0, 0, 255, 0.2)";
+    });
+    this.trunkGroundSelect.setEventListener("click", () => {
+      this.uiClicked = true;
+      this.selectGround(7);
+    });
+    this.trunkGroundSelect.setEventListener("mouseout", () => {
+      this.trunkGroundSelect.background.color = null;
+    });
+
+    this.uiHandler.register(this.trunkGroundSelect);
+    
+    this.leaveGroundSelect = new UIButton("8", new Vector(this.sceneManager.game.options.width - 40, 380), new Vector(40, 40), "#fff", 10);
+    this.leaveGroundSelect.background.image = GetAssetsLoader().loadImage("./images/Minecraft/Leaves.png");
+    this.leaveGroundSelect.borderColor = "#000";
+    this.leaveGroundSelect.setEventListener("mouseover", () => {
+      this.woodGroundSelect.background.color = "rgba(0, 0, 255, 0.2)";
+    });
+    this.woodGroundSelect.setEventListener("click", () => {
+      this.uiClicked = true;
+      this.selectGround(8);
+    });
+    this.leaveGroundSelect.setEventListener("mouseout", () => {
+      this.leaveGroundSelect.background.color = null;
+    });
+
+    this.uiHandler.register(this.leaveGroundSelect);
+    
+    this.uiHandler.register(this.saveBtn);
+    this.uiHandler.register(this.modeText);
   }
 
   onClick (e) {
     super.onClick(e);
-    if(this.isBuilding){
+    if(this.isBuilding && !this.uiClicked){
       this.map.grid.addObj(new this.selectedGroundClass(this.map.grid, this.mousePos));
     }else{
       this.map.grid.removeAt(this.mousePos);
