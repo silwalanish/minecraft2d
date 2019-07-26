@@ -8,7 +8,7 @@ class MainMenuScene extends Scene{
 
   init () {
     super.init();
-    this.background = new Sprite(GetAssetsLoader().assets["./images/Minecraft/Stone.png"], 0, 0); 
+    this.background = new Sprite(GetAssetsLoader().loadImage("./images/Minecraft/Stone.png"), 0, 0); 
     this.background.createPattern("repeat");
   }
 
@@ -576,11 +576,11 @@ class NormalGameScene extends GameScene{
     this.selectedGroundClass = GrassGround;
     this.selectedGround.isCulled = false;
 
-    this.goldUIImg = new Sprite(GetAssetsLoader().assets["./images/gold_block.png"], 0, 0);
-    this.woodUIImg = new Sprite(GetAssetsLoader().assets["./images/birch_planks.png"], 0, 0);
-    this.stoneUIImg = new Sprite(GetAssetsLoader().assets["./images/cobblestone.png"], 0, 0);
-    this.foodUIImg = new Sprite(GetAssetsLoader().assets["./images/apple.png"], 0, 0);
-    this.healthUIImg = new Sprite(GetAssetsLoader().assets["./images/health.png"], 0, 0);
+    this.goldUIImg = new Sprite(GetAssetsLoader().loadImage("./images/gold_block.png"), 0, 0);
+    this.woodUIImg = new Sprite(GetAssetsLoader().loadImage("./images/birch_planks.png"), 0, 0);
+    this.stoneUIImg = new Sprite(GetAssetsLoader().loadImage("./images/cobblestone.png"), 0, 0);
+    this.foodUIImg = new Sprite(GetAssetsLoader().loadImage("./images/apple.png"), 0, 0);
+    this.healthUIImg = new Sprite(GetAssetsLoader().loadImage("./images/health.png"), 0, 0);
 
     this.zombies = [];
 

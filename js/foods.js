@@ -9,7 +9,7 @@ class Food{
     this.vel = new Vector(0, 50);
     this.isCollected = false;
     this.collider = new Collider(this);
-    this.sprite = new Sprite(GetAssetsLoader().assets["./images/apple.png"], 0, 0, 20, 20);
+    this.sprite = new Sprite(GetAssetsLoader().loadImage("./images/apple.png"), 0, 0, 20, 20);
   }
 
   update (deltaTime, grid, player) {
