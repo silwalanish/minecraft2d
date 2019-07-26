@@ -50,9 +50,9 @@ class RandomGameMap extends GameMap {
       setTimeout(() => {
         for(let j = this.size.y - 1; j >= peak; j--) {
           if(j >= this.size.y - 5){
-            this.grid.addObj(new StoneGround(this.grid, new Vector(i, j)));
+            this.grid.setObj(new StoneGround(this.grid, new Vector(i, j)));
           }else if(j == peak){
-            this.grid.addObj(new GrassGround(this.grid, new Vector(i, j)));
+            this.grid.setObj(new GrassGround(this.grid, new Vector(i, j)));
             let generateTree = Math.round(Math.random() * 10);
             if(generateTree == 2){
               scene.addTree(i, j);
@@ -60,11 +60,11 @@ class RandomGameMap extends GameMap {
           }else{
             let gold = Math.round(Math.random() * 100);
             if(gold == 28){
-              this.grid.addObj(new GoldGround(this.grid, new Vector(i, j)));
+              this.grid.setObj(new GoldGround(this.grid, new Vector(i, j)));
             }else if(gold % 25 == 0){
-              this.grid.addObj(new StoneGround(this.grid, new Vector(i, j)));
+              this.grid.setObj(new StoneGround(this.grid, new Vector(i, j)));
             }else{
-              this.grid.addObj(new DirtGround(this.grid, new Vector(i, j)));
+              this.grid.setObj(new DirtGround(this.grid, new Vector(i, j)));
             }
           }
         }
@@ -119,7 +119,7 @@ class CustomMap extends GameMap {
               break;
           }
           if(obj){
-            this.grid.addObj(obj);
+            this.grid.setObj(obj);
           }
         }
       });

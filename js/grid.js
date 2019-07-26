@@ -87,6 +87,12 @@ class Grid {
 		}
 	}
 
+	setObj (obj) {
+		if(this.isOnGrid(obj.gridPos)) {
+			this.cells[obj.gridPos.y][obj.gridPos.x] = obj;
+		}
+	}
+
 	addObj (obj) {
 		if(this.isOnGrid(obj.gridPos) && !this.cellAt(obj.gridPos)){
 			if(this.map.heights[obj.gridPos.x] > obj.gridPos.y && obj.isGround){

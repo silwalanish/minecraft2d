@@ -509,10 +509,11 @@ class GameScene extends Scene {
   }
 
   endGame () {
-    this.sceneManager.switchToScene(new GameEndScene(this.sceneManager, this.className));
+    let ok = confirm("Are you sure you want to exit?");
+    if(ok){
+      this.sceneManager.switchToScene(new GameEndScene(this.sceneManager, this.className));
+    }
   }
-
-  
 
   selectGround (type) {
     switch (type) {
@@ -676,35 +677,36 @@ class NormalGameScene extends GameScene{
       }else{
         this.modeText.text = "MINE MODE";
       }
-      switch(e.keyCode){
-        case KEY_1:
-          this.selectGround(1);
-          break;
-        case KEY_2:
-          this.selectGround(2);
-          break;
-        case KEY_3:
-          this.selectGround(3);
-          break;
-        case KEY_4:
-          this.selectGround(4);
-          break;
-        case KEY_5:
-          this.selectGround(5);
-          break;
-        case KEY_6:
-          this.selectGround(6);
-          break;
-        case KEY_7:
-          this.selectGround(7);
-          break;
-        case KEY_8:
-          this.selectGround(8);
-          break;
-      }
     }
     if(e.keyCode == KEY_E){
       this.player.eatFood();
+    }
+    
+    switch(e.keyCode){
+      case KEY_1:
+        this.selectGround(1);
+        break;
+      case KEY_2:
+        this.selectGround(2);
+        break;
+      case KEY_3:
+        this.selectGround(3);
+        break;
+      case KEY_4:
+        this.selectGround(4);
+        break;
+      case KEY_5:
+        this.selectGround(5);
+        break;
+      case KEY_6:
+        this.selectGround(6);
+        break;
+      case KEY_7:
+        this.selectGround(7);
+        break;
+      case KEY_8:
+        this.selectGround(8);
+        break;
     }
   }
   
@@ -1055,6 +1057,7 @@ class CreativeGameScene extends GameScene{
         heights: this.map.heights,
         spawnPos: this.map.spawnPos
       }));
+      alert("Saved!");
     }
   }
 
