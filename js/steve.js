@@ -3,9 +3,20 @@
 const DEFAULT_STEVE_OPTIONS = {
   gravity: 200,
   vel: new Vector(100, 0),
-  sprite: GetAssetsLoader().loadImage("./images/Steve/anim-sheet.png"),
-  jumpForce: 140
+  sprite: GetAssetsLoader().loadImage("./images/anim-sheet.png"),
+  jumpForce: 140,
+  minningDelay: 0.2,
+  maxHealth: 100,
+  maxHunger: 100,
+  startRewardGold: 200,
+  startRewardWood: 200,
+  startRewardStone: 200,
+  startRewardFood: 3,
+  hungerModifier: 0.7
 };
+
+const LEFT_DIR = -1;
+const RIGHT_DIR = 1;
 
 class Steve{
 
@@ -17,7 +28,7 @@ class Steve{
     this.options = options || {};
     this.options = this.options.extends(DEFAULT_STEVE_OPTIONS);
 
-    this.vel = this.options.vel;
+    this.vel = this.options.vel.copy();
     this.gravity = this.options.gravity;
 
     this.spriteSheet = new Sprite(this.options.sprite, 0, 0, 64, 64);
@@ -30,17 +41,17 @@ class Steve{
     this.isBuilding = false;
     this.canMine = true;
     this.isOnGround = false;
-    this.minningDelay = 0.2;
+    this.minningDelay = this.options.minningDelay;
     this.timer = 0;
-    this.direction = 1;
-    this.hunger = 100;
-    this.health = 100;
+    this.direction = LEFT_DIR;
+    this.hunger = this.options.maxHunger;
+    this.health = this.options.maxHealth;
 
     this.rewards = {
-      gold: 0,
-      wood: 0,
-      stone: 0,
-      food: 3
+      gold: this.options.startRewardGold,
+      wood: this.options.startRewardWood,
+      stone: this.options.startRewardStone,
+      food: this.options.startRewardFood
     };
 
     this.isOnGround = false;
@@ -51,7 +62,10 @@ class Steve{
   eatFood () {
     if(this.rewards.food > 0 && this.hunger <= 50){
       this.rewards.food--;
+      this.health += 50;
       this.hunger += 50;
+      this.health = Math.min(this.health, this.options.maxHealth);
+      this.hunger = Math.min(this.hunger, this.options.maxHunger);
     }
   }
 
@@ -72,14 +86,14 @@ class Steve{
   }
 
   moveLeft () {
-    this.vel.x = 100;
-    this.direction = -1;
+    this.vel.x = this.options.vel.x;
+    this.direction = LEFT_DIR;
     this.isWalking = true;
   }
 
   moveRight () {
-    this.vel.x = 100;
-    this.direction = 1;
+    this.vel.x = this.options.vel.x;
+    this.direction = RIGHT_DIR;
     this.isWalking = true;
   }
 
@@ -116,7 +130,7 @@ class Steve{
   update (deltaTime) {
     this.timer += deltaTime;
     if(this.hunger > 0){
-      this.hunger -= deltaTime * 0.7;
+      this.hunger -= deltaTime * this.options.hungerModifier;
     }else{
       this.hunger = 0;
       this.health -= deltaTime;

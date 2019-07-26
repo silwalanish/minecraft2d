@@ -8,7 +8,7 @@ class MainMenuScene extends Scene{
 
   init () {
     super.init();
-    this.background = GetAssetsLoader().loadImage("./images/Minecraft/Stone.png");
+    this.background = new Sprite(GetAssetsLoader().assets["./images/Minecraft/Stone.png"], 0, 0); 
     this.background.createPattern("repeat");
   }
 
@@ -102,7 +102,7 @@ class ChooseMapScene extends Scene{
   init () {
     super.init();
 
-    this.background = GetAssetsLoader().loadImage("./images/Minecraft/Stone.png");
+    this.background = new Sprite(GetAssetsLoader().loadImage("./images/Minecraft/Stone.png"), 0, 0);
     this.background.createPattern("repeat");
     this.mapType = null;
     this.customMapData = null;
@@ -306,7 +306,7 @@ class GameScene extends Scene {
     this.className = GameScene;
     this.isInitialized = false;
 
-    this.background = new Sprite("./images/Skies/day.png", 0, 0);
+    this.background = new Sprite(GetAssetsLoader().loadImage("./images/Skies/day.png"), 0, 0);
 
     this.spawnPos = this.map.generate(this);
 
@@ -335,8 +335,8 @@ class GameScene extends Scene {
       this.quitBtn.background.color = null;
     });
 
-    this.helpText = new UIText("USE W/A/S/D or Arrow Keys to move. Press B to toggle Build/Mine mode.", 
-      new Vector(this.sceneManager.game.options.width / 2, this.sceneManager.game.options.height - 20), "#000", 20);
+    this.helpText = new UIText("USE W/A/S/D or Arrow Keys to move. Press B to toggle Build/Mine mode. LEFT CLICK TO MINE/PLACE OBJECT/KILL ZOMBIES", 
+      new Vector(this.sceneManager.game.options.width / 2, this.sceneManager.game.options.height - 20), "#000", 15);
  
     this.uiHandler.register(this.helpText);
     this.uiHandler.register(this.quitBtn);
@@ -347,7 +347,6 @@ class GameScene extends Scene {
     let pos = this.currentCamera.toWorldPos(new Vector(e.clientX, e.clientY));
     this.mousePos = this.map.grid.toGridPos(pos);
   }
-
   
   onMouseDown (e) {
     super.onMouseDown(e);
@@ -398,15 +397,14 @@ class GameScene extends Scene {
   addFood () {
     if(this.foods.length < 10){
       let x = Math.round(Math.random() * this.map.size.x);
-      let y = Math.round(this.map.heightAt(x));
-      y = this.map.size.y - y;
-      this.foods.push(new Food(this.map.grid.toWorldPos(new Vector(x, y - 1))));
+      let y = this.map.heightAt(x);
+      this.foods.push(new Food(this.map.grid.toWorldPos(new Vector(x, y - 2))));
     }
   }
 
   addTree (i, j) {
-    if(!this.map.grid.hasTreeAt(new Vector(i - 1, this.map.size.y - Math.round(this.map.heightAt(i - 1)) - 1)) && 
-      !this.map.grid.hasTreeAt(new Vector(i + 1, this.map.size.y - Math.round(this.map.heightAt(i + 1)) - 1)) &&
+    if(!this.map.grid.hasTreeAt(new Vector(i - 1, this.map.heightAt(i - 1) - 1)) && 
+      !this.map.grid.hasTreeAt(new Vector(i + 1, this.map.heightAt(i + 1) - 1)) &&
       this.map.grid.cellAt(new Vector(i, j)) instanceof GrassGround)
     {
       this.map.grid.addObj(new Trunk(this.map.grid, new Vector(i, j-1)));
@@ -445,6 +443,14 @@ class NormalGameScene extends GameScene{
 
     this.selectedGround = new GrassGround(this.map.grid, this.mousePos);
     this.selectedGround.isCulled = false;
+
+    this.goldUIImg = new Sprite(GetAssetsLoader().assets["./images/gold_block.png"], 0, 0, 20, 20);
+    this.woodUIImg = new Sprite(GetAssetsLoader().assets["./images/birch_planks.png"], 0, 0, 20, 20);
+    this.stoneUIImg = new Sprite(GetAssetsLoader().assets["./images/cobblestone.png"], 0, 0, 20, 20);
+    this.foodUIImg = new Sprite(GetAssetsLoader().assets["./images/apple.png"], 0, 0, 20, 20);
+    this.healthUIImg = new Sprite(GetAssetsLoader().assets["./images/health.png"], 0, 0, 20, 20);
+
+    this.zombies = [];
 
     this.isBuilding = false;
     
@@ -523,11 +529,30 @@ class NormalGameScene extends GameScene{
       this.player.eatFood();
     }
   }
+  
+  resize (width, height) {
+    super.resize(width, height);
+    this.currentCamera.follow(this.player, new Vector(this.sceneManager.game.options.width / 2, 300));
+  }
+
+  addZombie () {
+    if(this.zombies.length == 1){
+      return;
+    }
+    let x = Math.round(Math.random() * this.map.size.x);
+    let y = this.map.heightAt(x);
+    let zombiePos = this.map.grid.toWorldPos(new Vector(x, y - 3));
+    this.zombies.push(new Zombie(zombiePos, new Vector(GRID_SIZE * 0.9, GRID_SIZE * 0.9)));
+  }
 
   render (ctx) {
     super.render(ctx);
     
     this.currentCamera.begin(ctx);
+
+    this.zombies.forEach(zombie => {
+      zombie.draw(ctx);
+    });
 
     if(this.player.isBuilding){
       ctx.globalAlpha = 0.5;
@@ -543,17 +568,17 @@ class NormalGameScene extends GameScene{
     ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
     ctx.fillRect(0, 0, this.sceneManager.game.options.width, 40);
     
-    GetAssetsLoader().assets["./images/gold_block.png"].draw(ctx, new Vector(10, 10), new Vector(20, 20));
-    GetAssetsLoader().assets["./images/birch_planks.png"].draw(ctx, new Vector(165, 10), new Vector(20, 20));
-    GetAssetsLoader().assets["./images/cobblestone.png"].draw(ctx, new Vector(320, 10), new Vector(20, 20));
-    GetAssetsLoader().assets["./images/apple.png"].draw(ctx, new Vector(475, 10), new Vector(20, 20));
+    this.goldUIImg.draw(ctx, new Vector(10, 10), new Vector(20, 20));
+    this.woodUIImg.draw(ctx, new Vector(165, 10), new Vector(20, 20));
+    this.stoneUIImg.draw(ctx, new Vector(320, 10), new Vector(20, 20));
+    this.foodUIImg.draw(ctx, new Vector(475, 10), new Vector(20, 20));
 
     ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
     ctx.fillRect(0, this.sceneManager.game.options.height - 40, this.sceneManager.game.options.width, 40);
     ctx.closePath();
 
     ctx.beginPath();
-    GetAssetsLoader().assets["./images/health.png"].draw(ctx, new Vector(20, 50), new Vector(20, 20));
+    this.healthUIImg.draw(ctx, new Vector(20, 50), new Vector(20, 20));
     ctx.fillStyle = "#f00";
     ctx.fillRect(50, 50, Math.round(this.player.health), 20);
     ctx.strokeStyle = "#f00";
@@ -561,7 +586,7 @@ class NormalGameScene extends GameScene{
     ctx.closePath();
 
     ctx.beginPath();
-    GetAssetsLoader().assets["./images/apple.png"].draw(ctx, new Vector(20, 80), new Vector(20, 20));
+    this.foodUIImg.draw(ctx, new Vector(20, 80), new Vector(20, 20));
     ctx.fillStyle = "#00f";
     ctx.fillRect(50, 80, Math.round(this.player.hunger), 20);
     ctx.strokeStyle = "#00f";
@@ -572,7 +597,7 @@ class NormalGameScene extends GameScene{
   update (deltaTime) {
     super.update(deltaTime);
 
-    if(this.timer > 15){
+    if(this.timer > 1){
       let x = Math.round(Math.random() * this.map.size.x);
       let tries = 0;
       while (tries < 10){
@@ -583,6 +608,7 @@ class NormalGameScene extends GameScene{
         tries++;
       }
       this.addFood();
+      this.addZombie();
       this.timer = 0;
     }
 
@@ -615,6 +641,18 @@ class NormalGameScene extends GameScene{
         i--;
       }
     }
+    
+    for (let i = 0; i < this.zombies.length; i++) {
+      const zombie = this.zombies[i];
+      zombie.update(deltaTime, this.player);
+      if(zombie.health < 0){
+        this.zombies.splice(i, 1);
+        i--;
+        continue;
+      }
+      zombie.collideWithWorldBounds(this.worldSize);
+      zombie.collider.handleCollision(this.map.grid);
+    }
 
     this.player.collideWithWorldBounds(this.worldSize);
     this.player.collider.handleCollision(this.map.grid);    
@@ -640,11 +678,9 @@ class CreativeGameScene extends GameScene{
     this.isInitialized = false;
     
     this.className = CreativeGameScene;
-    
-    this.currentCamera.pos = this.spawnPos;
-    this.currentCamera.collideWithWorldBounds();
 
     this.selectedGround = new GrassGround(this.map.grid, this.mousePos);
+    this.selectedGroundClass = GrassGround;
     this.selectedGround.isCulled = false;
 
     this.isBuilding = false;
@@ -654,7 +690,9 @@ class CreativeGameScene extends GameScene{
 
   initUI () {
     super.initUI();
-    
+
+    this.selectedGroundText = new UIText("GRASSGROUND", new Vector(100, 80), "red", 20);
+
     this.modeText = new UIText("MINE MODE", new Vector(100, 110), "green", 20);
 
     this.saveBtn = new UIButton("Save", new Vector(this.sceneManager.game.options.width - 200, 20), new Vector(80, 30), "#fff", 20);
@@ -670,34 +708,94 @@ class CreativeGameScene extends GameScene{
     });
     
     this.uiHandler.register(this.saveBtn);
+    this.uiHandler.register(this.selectedGroundText);
+    this.uiHandler.register(this.modeText);
   }
 
-  resize (width, height) {
-    super.resize(width, height);
-    this.currentCamera.follow(this.player, new Vector(this.sceneManager.game.options.width / 2, 300));
+  selectGround (type) {
+    if(this.isBuilding){
+      switch (type) {
+        case 1:
+          this.selectedGroundClass = GrassGround;
+          break;
+        case 2:
+          this.selectedGroundClass = DirtGround;
+          break;
+        case 3:
+          this.selectedGroundClass = StoneGround;
+          break;
+        case 4:
+          this.selectedGroundClass = SandGround;
+          break;
+        case 5:
+          this.selectedGroundClass = WoodGround;
+          break;
+        case 6:
+          this.selectedGroundClass = GoldGround;
+          break;
+        case 7:
+          this.selectedGroundClass = Trunk;
+          break;
+        case 8:
+          this.selectedGroundClass = Leaves;
+          break;
+        default:
+          this.selectedGroundClass = GrassGround;
+      }
+      
+      this.selectedGround = new this.selectedGroundClass(this.map.grid, this.mousePos);
+      this.selectedGroundText.text = this.selectedGround.constructor.name.toUpperCase();
+    }
+  }
+
+  onClick (e) {
+    super.onClick(e);
+    if(this.isBuilding){
+      this.map.grid.addObj(new this.selectedGroundClass(this.map.grid, this.mousePos));
+    }else{
+      this.map.grid.removeAt(this.mousePos);
+    }
+  }
+
+  onMouseMove (e) {
+    super.onMouseMove(e);
+    this.selectedGround.gridPos = this.mousePos.copy(); 
   }
 
   onKeyDown (e) {
     super.onKeyDown(e);
     switch(e.keyCode){
       case KEY_B:
-        this.modeText.text = "BUILD MODE";
+        this.isBuilding = !this.isBuilding;
+        if(this.isBuilding){
+          this.modeText.text = "BUILD MODE";
+        }else{
+          this.modeText.text = "MINE MODE";
+        }
         break;
-    }
-  }
-
-  onKeyUp (e) {
-    super.onKeyUp(e);
-    switch(e.keyCode){
-      case KEY_W:
-      case KEY_UP:
-      case KEY_S:
-      case KEY_DOWN:
-      case KEY_A:
-      case KEY_LEFT:
-      case KEY_D:
-      case KEY_RIGHT:
-        this.currentCamera.isMoving = false;
+      case KEY_1:
+        this.selectGround(1);
+        break;
+      case KEY_2:
+        this.selectGround(2);
+        break;
+      case KEY_3:
+        this.selectGround(3);
+        break;
+      case KEY_4:
+        this.selectGround(4);
+        break;
+      case KEY_5:
+        this.selectGround(5);
+        break;
+      case KEY_6:
+        this.selectGround(6);
+        break;
+      case KEY_7:
+        this.selectGround(7);
+        break;
+      case KEY_8:
+        this.selectGround(8);
         break;
     }
   }
@@ -705,9 +803,19 @@ class CreativeGameScene extends GameScene{
   render (ctx) {
     super.render(ctx);
     
+    this.currentCamera.begin(ctx);
+
+    if(this.isBuilding){
+      this.selectedGround.draw(ctx);
+    }
+
+    this.currentCamera.end(ctx);
+
     ctx.beginPath();
     ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
     ctx.fillRect(0, 0, this.sceneManager.game.options.width, 40);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.fillRect(0, this.sceneManager.game.options.height - 40, this.sceneManager.game.options.width, 40);
     ctx.closePath();
   }
 
@@ -718,14 +826,16 @@ class CreativeGameScene extends GameScene{
       this.currentCamera.moveLeft();
     }else if(KEYBOARD.isKeyPressed(KEY_D) || KEYBOARD.isKeyPressed(KEY_RIGHT)){
       this.currentCamera.moveRight();
-    }else{
-      this.currentCamera.isMoving = false;
     }
 
     if(KEYBOARD.isKeyPressed(KEY_W) || KEYBOARD.isKeyPressed(KEY_UP)){
       this.currentCamera.moveUp();
     }else if(KEYBOARD.isKeyPressed(KEY_S) || KEYBOARD.isKeyPressed(KEY_DOWN)){
       this.currentCamera.moveDown();
+    }
+
+    if(this.isBuilding){
+      this.selectedGround.update(deltaTime);
     }
 
     this.map.update(deltaTime, this.currentCamera);
@@ -758,7 +868,7 @@ class GameEndScene extends Scene{
   init () {
     super.init();
     
-    this.background = GetAssetsLoader().loadImage("./images/Minecraft/Stone.png");
+    this.background = new Sprite(GetAssetsLoader().loadImage("./images/Minecraft/Stone.png"), 0, 0);
     this.background.createPattern("repeat");
   }
 

@@ -68,8 +68,11 @@ class Grid {
 						}else{
 							cell.isCulled = true;
 						}
+					}else{
+						cell.isNearPlayer = true;
+						cell.canMineCell = true;
+						cell.isCulled = false;
 					}
-
 				}
 			}
 		}
@@ -86,6 +89,9 @@ class Grid {
 
 	addObj (obj) {
 		if(this.isOnGrid(obj.gridPos) && !this.cellAt(obj.gridPos)){
+			if(this.map.heights[obj.gridPos.x] > obj.gridPos.y && obj.isGround){
+				this.map.heights[obj.gridPos.x] = obj.gridPos.y;
+			}
 			this.cells[obj.gridPos.y][obj.gridPos.x] = obj;
 		}
 	}
@@ -111,6 +117,9 @@ class Grid {
 
 	removeAt (gridPos) {
 		if(this.isOnGrid(gridPos)){
+			if(this.map.heights[gridPos.x] == gridPos.y && this.cells[gridPos.y][gridPos.x] && this.cells[gridPos.y][gridPos.x].isGround){
+				this.map.heights[gridPos.x] = gridPos.y + 1;
+			}
 			this.cells[gridPos.y][gridPos.x] = 0;
 		}
 	}
@@ -164,10 +173,16 @@ class Grid {
 					value = 2;
 				}else if(cell instanceof StoneGround) {
 					value = 3;
-				}else if(cell instanceof Trunk) {
+				}else if(cell instanceof SandGround) {
 					value = 4;
-				}else if(cell instanceof Leaves) {
+				}else if(cell instanceof WoodGround) {
 					value = 5;
+				}else if(cell instanceof GoldGround) {
+					value = 6;
+				}else if(cell instanceof Trunk) {
+					value = 7;
+				}else if(cell instanceof Leaves) {
+					value = 8;
 				}
 				grid[i].push(value);
 			}

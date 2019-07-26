@@ -6,8 +6,8 @@ class Sprite{
     this.image = imgSrc;
     this.sx = sx;
     this.sy = sy;
-    this.sw = sw || false;
-    this.sh = sh || false;
+    this.sw = (!sw) ? imgSrc.width : sw;
+    this.sh = (!sh) ? imgSrc.height : sh;
 
     this.loaded = false;
     this.pattern = false;

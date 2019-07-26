@@ -68,7 +68,7 @@ class Cell{
 class GrassGround extends Cell {
 
   constructor (grid, pos){
-    super(grid, pos, new Sprite("./images/Minecraft/Grass.PNG", 0, 0));
+    super(grid, pos, new Sprite(GetAssetsLoader().loadImage("./images/Minecraft/Grass.png"), 0, 0));
   }
 
 }
@@ -76,7 +76,7 @@ class GrassGround extends Cell {
 class DirtGround extends Cell{
   
   constructor (grid, pos){
-    super(grid, pos, new Sprite("./images/Minecraft/Dirt.PNG", 0, 0));
+    super(grid, pos, new Sprite(GetAssetsLoader().loadImage("./images/Minecraft/Dirt.png"), 0, 0));
   }
 
 }
@@ -84,7 +84,7 @@ class DirtGround extends Cell{
 class WoodGround extends Cell{
   
   constructor (grid, pos){
-    super(grid, pos, new Sprite("./images/Minecraft/Wood_ground.PNG", 0, 0));
+    super(grid, pos, new Sprite(GetAssetsLoader().loadImage("./images/Minecraft/Wood_ground.png"), 0, 0));
   }
 
 }
@@ -92,7 +92,7 @@ class WoodGround extends Cell{
 class StoneGround extends Cell{
   
   constructor (grid, pos, stoneAmount){
-    super(grid, pos, new Sprite("./images/Minecraft/Stone.PNG", 0, 0));
+    super(grid, pos, new Sprite(GetAssetsLoader().loadImage("./images/Minecraft/Stone.png"), 0, 0));
     this.stoneAmount = stoneAmount || 200;
   }
 
@@ -111,7 +111,7 @@ class StoneGround extends Cell{
 class SandGround extends Cell{
   
   constructor (grid, pos){
-    super(grid, pos, new Sprite("./images/Minecraft/Sand.PNG", 0, 0));
+    super(grid, pos, new Sprite(GetAssetsLoader().loadImage("./images/Minecraft/Sand.png"), 0, 0));
   }
 
 }
@@ -119,7 +119,7 @@ class SandGround extends Cell{
 class GoldGround extends Cell{
 
   constructor (grid, pos, goldAmount){
-    super(grid, pos, new Sprite("./images/Minecraft/Gold.PNG", 0, 0));
+    super(grid, pos, new Sprite(GetAssetsLoader().loadImage("./images/Minecraft/Gold.png"), 0, 0));
     this.goldAmount = goldAmount || 200;
   }
 
@@ -137,7 +137,7 @@ class GoldGround extends Cell{
 class Leaves extends Cell{
 
   constructor (grid, pos) {
-    super(grid, pos, new Sprite("./images/Minecraft/Leaves.PNG", 0, 0));
+    super(grid, pos, new Sprite(GetAssetsLoader().loadImage("./images/Minecraft/Leaves.png"), 0, 0));
     this.isGround = false;
   }
 
@@ -146,7 +146,7 @@ class Leaves extends Cell{
 class Trunk extends Cell{
 
   constructor (grid, pos, leaves, woodAmount) {
-    super(grid, pos, new Sprite("./images/Minecraft/Wood_trunk.PNG", 0, 0));
+    super(grid, pos, new Sprite(GetAssetsLoader().loadImage("./images/Minecraft/Wood_trunk.png"), 0, 0));
     this.isGround = false;
     this.woodAmount = woodAmount || 200;
     this.leaves = leaves || [];

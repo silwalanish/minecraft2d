@@ -9,6 +9,7 @@ class Food{
     this.vel = new Vector(0, 50);
     this.isCollected = false;
     this.collider = new Collider(this);
+    this.sprite = new Sprite(GetAssetsLoader().assets["./images/apple.png"], 0, 0, 20, 20);
   }
 
   update (deltaTime, grid, player) {
@@ -27,7 +28,7 @@ class Food{
 
   draw (ctx) {
     ctx.beginPath();
-    GetAssetsLoader().assets["./images/apple.png"].draw(ctx, this.pos, this.dims);
+    this.sprite.draw(ctx, this.pos, this.dims);
     ctx.closePath();
   }
 

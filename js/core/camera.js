@@ -8,11 +8,11 @@ class Camera{
 		this.world = world;
 		this.vel = new Vector(0, 0);
 
-		this.isMoving = false;
 		this.following = null;
+		this.isMoving = false;
 		this.offset = new Vector();
 	}
-
+	
 	moveLeft () {
     this.vel.x = -100;
     this.isMoving = true;
@@ -33,6 +33,7 @@ class Camera{
     this.isMoving = true;
   }
 
+
 	update (deltaTime) {
 		if(this.following){
 			if(this.following.pos.x + this.offset.x - this.pos.x > this.viewport.x){
@@ -50,8 +51,9 @@ class Camera{
 			this.collideWithWorldBounds();
 		}else if(this.isMoving){
 			this.pos.x += this.vel.x * deltaTime;
-			this.pos.y += this.vel.y * deltaTime;
-
+      this.pos.y += this.vel.y * deltaTime;
+			this.isMoving = false;
+			
 			this.collideWithWorldBounds();
 		}else{
 			this.vel.x = 0;

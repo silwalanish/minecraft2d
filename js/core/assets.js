@@ -10,25 +10,43 @@ function GetAssetsLoader () {
 
     constructor () {
       this.assets = {};
+      this.numStillLoading = 0;
     }
 
-    loadImage (path, callback, reload) {
+    loadImage (path, reload) {
       if(this.assets.hasOwnProperty(path) && !reload){
-        if(callback){
-          this.assets[path] = callback(this.assets[path]);
-        }
         return this.assets[path];
       }
-
+      this.numStillLoading++;
       this.assets[path] = new Image();
       this.assets[path].src = path;
-      this.assets[path].onload = () => {
-        if(callback){
-          this.assets[path] = callback(this.assets[path]);
-        }
+      this.assets[path].onload = (img) => {
+        console.log(path);
+        
+        this.numStillLoading--;
       };
 
       return this.assets[path];
+    }
+
+    loadImagesAndWait (pathArray, callback) {
+      this.numStillLoading = 0;
+      pathArray.forEach(path => {
+        this.loadImage(path);
+      });
+      window.requestAnimationFrame(() => {
+        this.loop(callback);
+      });
+    }
+
+    loop (callback) {
+      if(this.numStillLoading == 0){
+        callback();
+      }else{
+        window.requestAnimationFrame(() => {
+          this.loop(callback);
+        });
+      }
     }
 
   }

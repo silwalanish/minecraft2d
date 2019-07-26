@@ -44,7 +44,7 @@ class RandomGameMap extends GameMap {
 
   generate (scene) {
     for (let i = 0; i < this.size.x; i++) {
-      let height = Math.round(this.heightMap.height(i));
+      let height = Math.max(1, Math.round(this.heightMap.height(i)));
       let peak = this.size.y - height;
       this.heights.push(peak);
       setTimeout(() => {
@@ -103,9 +103,18 @@ class CustomMap extends GameMap {
               obj = new StoneGround(this.grid, new Vector(i, j));
               break;
             case 4:
-              obj = new Trunk(this.grid, new Vector(i, j));
+              obj = new SandGround(this.grid, new Vector(i, j));
               break;
             case 5:
+              obj = new WoodGround(this.grid, new Vector(i, j));
+              break;
+            case 6:
+              obj = new GoldGround(this.grid, new Vector(i, j));
+              break;
+            case 7:
+              obj = new Trunk(this.grid, new Vector(i, j));
+              break;
+            case 8:
               obj = new Leaves(this.grid, new Vector(i, j));
               break;
           }
