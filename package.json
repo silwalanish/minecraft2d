@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Minecraft in 2D",
   "main": "index.js",
+  "scripts": {
+    "license": "licenser"
+  },
   "repository": "git@github.com:silwalanish/minecraft2d",
   "author": "silwalanish <silwalanish@gmail.com>",
   "license": "MIT",
