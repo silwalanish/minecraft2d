@@ -1,4 +1,5 @@
-# MINECRAFT 2D ![Logo](screenshots/logo.png?raw=true "MINECRAFT2D")
+![Logo](screenshots/logo.png?raw=true "MINECRAFT2D")
+# MINECRAFT 2D
 
 # [Play](https://silwalanish.github.io/minecraft2d/) 
 
