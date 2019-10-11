@@ -1,0 +1,15 @@
+{
+  "name": "minecraft2d",
+  "version": "1.0.0",
+  "description": "Minecraft in 2D",
+  "main": "index.js",
+  "scripts": {
+    "license": "licenser -l LICENSE"
+  },
+  "repository": "git@github.com:silwalanish/minecraft2d",
+  "author": "silwalanish <silwalanish@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@laudio/licenser": "^1.0.6"
+  }
+}
