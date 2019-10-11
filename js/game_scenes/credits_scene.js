@@ -33,15 +33,10 @@ class CreditsScene extends Scene{
 
     this.background = new Sprite(GetAssetsLoader().loadImage("./images/Minecraft/Stone.png"), 0, 0);
     this.background.createPattern("repeat");
-    this.mapType = null;
-    this.customMapData = null;
   }
 
   initUI () {
     super.initUI();
-
-    this.errorText = new UIText("", new Vector(this.sceneManager.game.options.width / 2, this.sceneManager.game.options.height - 150), "#f00", 30);
-    this.uiHandler.register(this.errorText);
 
     let title = new UIText("CREDITS", new Vector(this.sceneManager.game.options.width / 2, 100), "#fff", 100);
     title.fontWeight = "900";
