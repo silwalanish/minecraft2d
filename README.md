@@ -17,13 +17,11 @@
 
 Minecraft
 <div>
-  <img src="images/minecraft/Spritesheet.PNG?raw=true" width=50 height=50 hspace=3>
   <img src="images/minecraft/Tnt.PNG?raw=true" width=50 height=50 hspace=3>
   <img src="images/minecraft/Water.PNG?raw=true" width=50 height=50 hspace=3>
   <img src="images/minecraft/coat.png?raw=true" width=50 height=50 hspace=3>
   <img src="images/minecraft/dirt.png?raw=true" width=50 height=50 hspace=3>
-  <img src="images/minecraft/glass.png?raw=true" width=50 height=50 hspace=3>
-  <img src="images/minecraft/gold.png?raw=true" width=50 height=50 hspace=3>
+  <img src="images/minecraft/glass.png?raw=true" width=50 height=50 hspace=3
   <img src="images/minecraft/gold.png?raw=true" width=50 height=50 hspace=3>
   <img src="images/minecraft/grass.png?raw=true" width=50 height=50 hspace=3>
   <img src="images/minecraft/leaves.png?raw=true" width=50 height=50 hspace=3>
@@ -58,15 +56,14 @@ Skies
 
 General
 <div>
-  <img src="images/anim-sheet.png?raw=true" width=50 height=50 hspace=3>
+  <img src="images/anim-sheet.png?raw=true" hspace=3>
   <img src="images/apple.png?raw=true" width=50 height=50 hspace=3>
   <img src="images/birch_planks.png?raw=true" width=50 height=50 hspace=3>
   <img src="images/clay.png?raw=true" width=50 height=50 hspace=3>
   <img src="images/cobblestone.png?raw=true" width=50 height=50 hspace=3>
   <img src="images/gold_block.png?raw=true" width=50 height=50 hspace=3>
   <img src="images/health.png?raw=true" width=50 height=50 hspace=3>
-  <img src="images/inventory.png?raw=true" width=50 height=50 hspace=3>
-  <img src="images/state-transition.png?raw=true" width=50 height=50 hspace=3>
-  <img src="images/zombie_typea_attack_spritesheet.png?raw=true" width=50 height=50 hspace=3>
-  <img src="images/zombie_typea_walk_spritesheet.png?raw=true" width=50 height=50 hspace=3>
+  <img src="images/inventory.png?raw=true"  hspace=3>
+  <img src="images/zombie_typea_attack_spritesheet.png?raw=true" hspace=3>
+  <img src="images/zombie_typea_walk_spritesheet.png?raw=true" hspace=3>
 </div>
