@@ -54,30 +54,30 @@ https://opengameart.org/content/zombie-character-sprite
 
 ### 4. Skies
 <div>
-    <img src="images/skies/air.png?raw=true" width=320 height=240>
-    <img src="images/skies/aug.png?raw=true" width=320 height=240>
-    <img src="images/skies/bah.png?raw=true" width=320 height=240>
-    <img src="images/skies/cit.png?raw=true" width=320 height=240>
-    <img src="images/skies/day.png?raw=true" width=320 height=240>
-    <img src="images/skies/dro.png?raw=true" width=320 height=240>
-    <img src="images/skies/dus.png?raw=true" width=320 height=240>
-    <img src="images/skies/ice.png?raw=true" width=320 height=240>
-    <img src="images/skies/ken.png?raw=true" width=320 height=240>
-    <img src="images/skies/mon.png?raw=true" width=320 height=240>
-    <img src="images/skies/mor.png?raw=true" width=320 height=240>
-    <img src="images/skies/nac.png?raw=true" width=320 height=240>
-    <img src="images/skies/omb.png?raw=true" width=320 height=240>
-    <img src="images/skies/ora.png?raw=true" width=320 height=240>
-    <img src="images/skies/sen.png?raw=true" width=320 height=240>
-    <img src="images/skies/sno.png?raw=true" width=320 height=240>
-    <img src="images/skies/son.png?raw=true" width=320 height=240>
-    <img src="images/skies/twi.png?raw=true" width=320 height=240>
+    <img src="images/skies/air.png?raw=true" width=160 height=120>
+    <img src="images/skies/aug.png?raw=true" width=160 height=120>
+    <img src="images/skies/bah.png?raw=true" width=160 height=120>
+    <img src="images/skies/cit.png?raw=true" width=160 height=120>
+    <img src="images/skies/day.png?raw=true" width=160 height=120>
+    <img src="images/skies/dro.png?raw=true" width=160 height=120>
+    <img src="images/skies/dus.png?raw=true" width=160 height=120>
+    <img src="images/skies/ice.png?raw=true" width=160 height=120>
+    <img src="images/skies/ken.png?raw=true" width=160 height=120>
+    <img src="images/skies/mon.png?raw=true" width=160 height=120>
+    <img src="images/skies/mor.png?raw=true" width=160 height=120>
+    <img src="images/skies/nac.png?raw=true" width=160 height=120>
+    <img src="images/skies/omb.png?raw=true" width=160 height=120>
+    <img src="images/skies/ora.png?raw=true" width=160 height=120>
+    <img src="images/skies/sen.png?raw=true" width=160 height=120>
+    <img src="images/skies/sno.png?raw=true" width=160 height=120>
+    <img src="images/skies/son.png?raw=true" width=160 height=120>
+    <img src="images/skies/twi.png?raw=true" width=160 height=120>
 </div>
 
 ### 5. Misc
 <div>
+    <img src="images/inventory.png?raw=true" width=128 height=128>
     <img src="images/apple.png?raw=true" width=32 height=32>
     <img src="images/health.png?raw=true" width=32 height=32>
-    <img src="images/inventory.png?raw=true" width=128 height=128>
 </div>
 
