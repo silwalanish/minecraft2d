@@ -75,9 +75,29 @@ class MainMenuScene extends Scene{
       this.playCreative();
     });
 
+    let creditsBtn = new UIButton("Credits", new Vector(this.sceneManager.game.options.width / 2, this.sceneManager.game.options.height / 2 + 160), 
+              new Vector(350, 50), "#fff", 30);
+
+    creditsBtn.background.image = GetAssetsLoader().loadImage("./images/clay.png");
+    creditsBtn.borderColor = "#000";
+    creditsBtn.borderSize = 2;
+
+    creditsBtn.setEventListener('mouseover', function() {
+      this.background.color = "rgba(0, 0, 255, 0.5)";
+    });
+
+    creditsBtn.setEventListener('mouseout', function() {
+      this.background.color = null;
+    });
+
+    creditsBtn.setEventListener('click', () =>{
+      this.showCredits();
+    });
+
     this.uiHandler.register(title);
     this.uiHandler.register(playBtn);
     this.uiHandler.register(playCreativeBtn);
+    this.uiHandler.register(creditsBtn);
   }
 
   play () {
@@ -86,6 +106,10 @@ class MainMenuScene extends Scene{
 
   playCreative () {
     this.sceneManager.switchToScene(new ChooseMapScene(this.sceneManager, CreativeGameScene));
+  }
+
+  showCredits () {
+    this.sceneManager.switchToScene(new CreditsScene(this.sceneManager));
   }
 
 }
