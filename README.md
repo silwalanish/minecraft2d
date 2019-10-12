@@ -21,7 +21,7 @@ Minecraft
   <img src="images/minecraft/Water.PNG?raw=true" width=50 height=50 hspace=3>
   <img src="images/minecraft/coat.png?raw=true" width=50 height=50 hspace=3>
   <img src="images/minecraft/dirt.png?raw=true" width=50 height=50 hspace=3>
-  <img src="images/minecraft/glass.png?raw=true" width=50 height=50 hspace=3
+  <img src="images/minecraft/glass.png?raw=true" width=50 height=50 hspace=3>
   <img src="images/minecraft/gold.png?raw=true" width=50 height=50 hspace=3>
   <img src="images/minecraft/grass.png?raw=true" width=50 height=50 hspace=3>
   <img src="images/minecraft/leaves.png?raw=true" width=50 height=50 hspace=3>
