@@ -42,55 +42,60 @@ class HelpScene extends Scene{
     title.fontWeight = "900";
 
     let controlsLines = [
-        "Up Arrow | W => Jump",
-        "Left Arrow | A => Move left",
-        "Right Arrow | D => Move Right",
-        "B => Toggle Build/Mine mode",
-        "E => Eat food(apple)",
-        "1-8 => Change ground to be built in building mode.",
-        "Also can be changed by clicking on the icons on the left."
+      "Up Arrow | W => Jump",
+      "Left Arrow | A => Move left",
+      "Right Arrow | D => Move Right",
+      "B => Toggle Build/Mine mode",
+      "E => Eat food(apple)",
+      "1-8 => Change ground to be built in building mode.",
+      "Also can be changed by clicking on the icons on the left."
     ];
 
     let rulesLines = [
-        "Can't eat food unless hunger (BLUE) bar is less than 50.",
-        "Eating food restores health and hunger by 50 with maximum being 100 for both.",
-        "When Build Mode is on clicking on empty space creates the selected ground.",
-        "When Mine Mode is on clicking on ground/trees with in 1 block of player will be mined.",
-        "Mining resources gives rewards.",
-        "Zombies will follow when near",
-        "If Zombies touch then health decrease.",
-        "When hunger becomes zero health decreases.",
-        "When health becomes zero player dies.",
-        "Building ground requires resources.",
-        "In creative mode, any ground can be removed and added without charge.",
+      "Can't eat food unless hunger (BLUE) bar is less than 50.",
+      "Eating food restores health and hunger by 50 with maximum being 100 for both.",
+      "When Build Mode is on clicking on empty space creates the selected ground.",
+      "When Mine Mode is on clicking on ground/trees with in 1 block of player will be mined.",
+      "Mining resources gives rewards.",
+      "Zombies will follow when near",
+      "If Zombies touch then health decrease.",
+      "When hunger becomes zero health decreases.",
+      "When health becomes zero player dies.",
+      "Building ground requires resources.",
+      "In creative mode, any ground can be removed and added without charge.",
     ]
 
     let controlsTitle = new UIText("Controls", new Vector(330, 200), "#fff", 40);
     let controlsContent = controlsLines.map((line, index) => (
-        new UIText(line, new Vector(330, 240 + (index * 25)), "#fff", 20)
+      new UIText(line, new Vector(330, 240 + (index * 25)), "#fff", 20)
     ));
 
     let rulesTitle = new UIText("Rules", new Vector(330 + 600, 200), "#fff", 40);
     let rulesContent = rulesLines.map((line, index) => (
-        new UIText(line, new Vector(330 + 600, 240 + (index * 25)), "#fff", 20)
+      new UIText(line, new Vector(330 + 600, 240 + (index * 25)), "#fff", 20)
     ));
 
-    let backBtn = new UIButton("Back", new Vector(this.sceneManager.game.options.width / 2 - 80, this.sceneManager.game.options.height - 100), 
-              new Vector(120, 50), "#fff", 20);
+    let backBtn = new UIButton("Back", new Vector(
+      this.sceneManager.game.options.width / 2 - 80,
+      this.sceneManager.game.options.height - 100), 
+      new Vector(120, 50),
+      "#fff",
+      20
+    );
     backBtn.background.image = GetAssetsLoader().loadImage("./images/clay.png");
     backBtn.borderColor = "#000";
     backBtn.borderSize = 2;
 
     backBtn.setEventListener('mouseover', function() {
-        this.background.color = "rgba(255, 0, 0, 0.5)";
+      this.background.color = "rgba(255, 0, 0, 0.5)";
     });
   
     backBtn.setEventListener('mouseout', function() {
-    this.background.color = null;
+      this.background.color = null;
     });
 
     backBtn.setEventListener('click', () =>{
-    this.back();
+      this.back();
     });
 
     this.uiHandler.register(title);
