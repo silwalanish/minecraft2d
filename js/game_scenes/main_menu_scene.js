@@ -94,10 +94,30 @@ class MainMenuScene extends Scene{
       this.showCredits();
     });
 
+    let helpBtn = new UIButton("Help", new Vector(this.sceneManager.game.options.width / 2, this.sceneManager.game.options.height / 2 + 240), 
+              new Vector(350, 50), "#fff", 30);
+
+    helpBtn.background.image = GetAssetsLoader().loadImage("./images/clay.png");
+    helpBtn.borderColor = "#000";
+    helpBtn.borderSize = 2;
+
+    helpBtn.setEventListener('mouseover', function() {
+      this.background.color = "rgba(0, 0, 255, 0.5)";
+    });
+
+    helpBtn.setEventListener('mouseout', function() {
+      this.background.color = null;
+    });
+
+    helpBtn.setEventListener('click', () =>{
+      this.showHelp();
+    });
+
     this.uiHandler.register(title);
     this.uiHandler.register(playBtn);
     this.uiHandler.register(playCreativeBtn);
     this.uiHandler.register(creditsBtn);
+    this.uiHandler.register(helpBtn);
   }
 
   play () {
@@ -110,6 +130,10 @@ class MainMenuScene extends Scene{
 
   showCredits () {
     this.sceneManager.switchToScene(new CreditsScene(this.sceneManager));
+  }
+
+  showHelp () {
+    this.sceneManager.switchToScene(new HelpScene(this.sceneManager));
   }
 
 }
